@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Вечная цитадель — Железный Круг</title>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark;
+--bg:#14161a;--panel:#1f2328;--steel:#8f9aa3;--rust:#b4532a;--haz:#e3b021;--txt:#d9dde0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.4 "Segoe UI",Roboto,Arial,sans-serif;display:flex;justify-content:center;padding:8px}
+.wrap{width:100%;max-width:900px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:var(--panel);border-bottom:4px solid;border-image:repeating-linear-gradient(135deg,var(--haz) 0 10px,#111 10px 20px) 4}
+h1{font:20px "Russo One",Impact,sans-serif;margin:0;color:var(--steel)}
+#stats{display:flex;gap:14px;font-weight:600;flex-wrap:wrap}
+#stats b{color:var(--haz)}
+canvas{width:100%;height:auto;display:block;background:#1b1d1f;touch-action:none;cursor:crosshair}
+#bar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+button{font:inherit;background:var(--panel);color:var(--txt);border:1px solid #3a4047;padding:6px 10px;border-radius:3px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--haz)}
+button:focus-visible{outline:2px solid var(--haz);outline-offset:2px}
+button.on{background:#3b2a1d;border-color:var(--rust)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button small{display:block;color:var(--steel);font-size:12px}
+#go{background:var(--rust);border-color:var(--rust);color:#fff;font-weight:700;margin-left:auto}
+#msg{background:var(--panel);padding:8px 12px;border-left:4px solid var(--rust);font-style:italic;color:var(--steel);min-height:40px}
+#shop{margin-top:8px;background:var(--panel);padding:8px 12px;border:1px solid #3a4047}
+#shop.hot{border-color:var(--haz);box-shadow:0 0 0 2px #e3b02155}
+#shh{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:6px;color:var(--steel)}
+#shh b{color:var(--haz)}
+#ug{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+#ug button{text-align:left}
+.ovl{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
+.ovl>div{background:var(--panel);padding:24px;max-width:480px;border-top:6px solid var(--haz)}
+.ovl h2{font:28px "Russo One",Impact,sans-serif;margin:0 0 10px;color:var(--steel)}
+.ovl p{margin:.5em 0}.ovl button{margin:8px 8px 0 0}
+#ov{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;text-align:center;padding:20px}
+#ov div{background:var(--panel);padding:24px;max-width:420px;border-top:6px solid var(--haz)}
+#ov h2{font:26px "Russo One",Impact,sans-serif;margin:0 0 8px}
+</style>
+<style>
+:root{--bg:#0a0908;--panel:#15120e;--steel:#a39d90;--rust:#8f3a1a;--haz:#d9a521;--txt:#d8d2c4}
+body{background:radial-gradient(ellipse at 50% -10%,#2b1b0e 0,#0a0908 65%) fixed,#0a0908;font-family:Oswald,"Segoe UI",Arial,sans-serif;letter-spacing:.2px}
+header{background:linear-gradient(#1f1a13,#100d0a);border:1px solid #2c261d;box-shadow:inset 0 1px 0 #ffffff0d,0 6px 20px #000a}
+h1{font-size:24px;color:#c9b88e;text-shadow:0 2px 0 #000,0 0 14px #b4532a88;letter-spacing:2px}
+#stats b{text-shadow:0 0 8px #d9a52188}
+.cw{position:relative;border:5px solid #26211a;box-shadow:0 0 0 1px #000,0 0 40px #000c}
+.cw::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,#000b 100%)}
+button{background:linear-gradient(#2a241b,#151210);border:1px solid #3d352a;color:var(--txt);box-shadow:inset 0 1px 0 #ffffff10;border-radius:2px;font-family:inherit}
+button:hover:not(:disabled){border-color:var(--haz);box-shadow:0 0 10px #d9a52144}
+button.on{background:linear-gradient(#5a2b12,#2b140a);border-color:var(--haz)}
+#go{background:linear-gradient(#a8441c,#5a2008);border-color:var(--haz);text-shadow:0 1px 0 #000}
+#msg,#shop{background:linear-gradient(#16130f,#0e0c09);border:1px solid #2c261d;border-left:4px solid var(--rust);box-shadow:inset 0 0 30px #0009}
+#shop.hot{border-color:var(--haz);box-shadow:0 0 18px #d9a52155,inset 0 0 30px #0009}
+.ovl>div{background:linear-gradient(#1c1710,#0d0b08);border:1px solid #3d352a;border-top:6px solid var(--haz);box-shadow:0 0 70px #000}
+.ovl h2{text-shadow:0 2px 0 #000,0 0 16px #b4532a88;color:#c9b88e}
+.ovl canvas{width:120px;height:90px;background:#0d0b09;border:1px solid #2c261d}
+#bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:8px;margin-bottom:6px}
+.bc{display:flex;gap:10px;background:#120f0c;padding:8px;border:1px solid #2c261d}.bc canvas{flex:none}
+.bc small{color:var(--steel)}.bc .st{color:var(--haz)}
+</style><style>
+#menu{padding:0;background:radial-gradient(ellipse at 72% 45%,#4a220d 0,#140d08 45%,#070605 100%)}
+#menu .cog{position:absolute;right:-8vmin;top:50%;width:90vmin;height:90vmin;margin-top:-45vmin;opacity:.12;animation:spin 140s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#menu .cog{animation:none}}
+#menu>.mm{max-width:none;width:100%;height:100%;border:0;background:none;box-shadow:none;display:grid;grid-template-columns:minmax(260px,1fr) minmax(280px,1fr);gap:28px 5vw;align-content:center;padding:6vh 7vw 8vh;position:relative;overflow:auto}
+.mm .mt small{letter-spacing:6px;color:var(--steel)}
+.mm h1{font:clamp(40px,8vw,92px)/.95 "Russo One",Impact,sans-serif;margin:.1em 0;color:#c9b88e;text-shadow:0 3px 0 #000,0 0 40px #b4532acc;letter-spacing:1px}
+.mm nav{display:flex;flex-direction:column;gap:8px;margin-top:22px;max-width:320px}
+.mm nav button{padding:12px 16px;text-align:left;font-size:18px;margin:0}
+.mm .ml{align-self:center;color:var(--steel);border-left:3px solid var(--rust);padding-left:18px;font-size:17px;line-height:1.5}
+.mm::before{content:"";position:absolute;left:0;right:0;bottom:0;height:14px;background:repeating-linear-gradient(135deg,#d9a521 0 14px,#0c0a08 14px 28px)}
+@media(max-width:760px){#menu>.mm{grid-template-columns:1fr}}
+#set label{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:12px 0}
+#set input[type=range]{width:55%}
+#ag{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:6px}
+.ac{background:#120f0c;border:1px solid #2c261d;padding:8px 10px}.ac b{color:var(--haz)}.ac small{color:var(--steel)}.ac.lk{opacity:.45}.ac.lk b{color:var(--steel)}
+.cw.nv::after{display:none}
+#lg h3{font:18px "Russo One",Impact,sans-serif;margin:16px 0 2px;color:var(--haz)}#lg p{margin:2px 0 8px;color:var(--steel)}
+#lg .row{display:flex;flex-wrap:wrap;gap:8px}#lg button{width:215px;text-align:left;margin:0}#lg button small{color:var(--steel)}
+#toast{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-140px);transition:transform .35s;z-index:9;background:linear-gradient(#2b2012,#150f08);border:1px solid var(--haz);border-left:5px solid var(--haz);padding:10px 18px;box-shadow:0 0 30px #000;color:#e8dcb8;pointer-events:none}
+#toast.show{transform:translate(-50%,0)}
+</style></head>
+<body>
+<div class="wrap">
+<header><h1>ВЕЧНАЯ ЦИТАДЕЛЬ</h1>
+<div id="stats">Ресурсы: <b id="sg"></b> Волна: <b id="sw"></b> <span id="sel">Враги</span>: <b id="se"></b> <span id="shl">Цитадель</span>: <b id="sh"></b></div></header>
+<div class="cw"><canvas id="cv" width="800" height="480"></canvas></div>
+<div id="bar"></div>
+<div id="msg"></div>
+<section id="shop"><div id="shh"><b>Кузни Железного Круга</b><span>Адамантий: <b id="sa"></b></span><span>Рекорд: <b id="sb"></b> волн</span><span>Осколки доктрины: <b id="ss"></b></span><button id="pr"></button></div><div id="ug"></div></section>
+</div>
+<div id="menu" class="ovl">
+<svg class="cog" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="78" fill="none" stroke="#c9b88e" stroke-width="20" stroke-dasharray="11 9.4"/><circle cx="100" cy="100" r="64" fill="none" stroke="#c9b88e" stroke-width="8"/><circle cx="100" cy="100" r="30" fill="none" stroke="#c9b88e" stroke-width="6"/><path d="M100 40v120M40 100h120" stroke="#c9b88e" stroke-width="5"/></svg>
+<div class="mm"><div class="mt"><small>ЖЕЛЕЗНЫЕ ВОИНЫ</small><h1>ВЕЧНАЯ<br>ЦИТАДЕЛЬ</h1>
+<nav><button id="mgo">Начать оборону</button><button id="mnew">Сменить миссию</button><button id="mach">Достижения</button><button id="mbes">Бестиарий</button><button id="mset">Настройки</button><button id="mhow">Как играть</button></nav></div>
+<div class="ml"><p>Олимпия. Цитадель Пертурабо зовётся Вечной: за тысячу осад ни один враг не оставил на её стенах даже трещины.</p>
+<p>Но на орбите встал флот Имперских Кулаков. Рогал Дорн, брат и вечный соперник, пришёл доказать, что любую стену можно сломать упорством.</p>
+<p>Ты — Пертурабо. Стены, орудия и расчёт — твой ответ.</p><p><small id="mst"></small></p></div></div></div>
+<div id="set" class="ovl"><div><h2>Настройки</h2>
+<label>Громкость эффектов <input type="range" id="c_sv" min="0" max="1" step=".05"></label>
+<label>Громкость музыки <input type="range" id="c_mv" min="0" max="1" step=".05"></label>
+<label>Пепел над полем <input type="checkbox" id="c_ash"></label>
+<label>Затемнение по краям <input type="checkbox" id="c_vig"></label>
+<label>Сетка построек <input type="checkbox" id="c_grid"></label>
+<button id="c_rs">Сбросить весь прогресс</button><button id="c_cl">Закрыть</button></div></div>
+<div id="ach" class="ovl"><div style="max-width:820px;max-height:90vh;overflow:auto"><h2>Достижения <small id="acn"></small></h2><div id="ag"></div><button id="acl">Закрыть</button></div></div>
+<div id="lvl" class="ovl"><div style="max-width:920px;max-height:90vh;overflow:auto"><h2>Выбор миссии</h2><div id="lg"></div><button id="lcl">Назад</button></div></div>
+<div id="win" class="ovl"><div><h2 id="wt"></h2><p id="wd"></p><button id="wnx">Следующая миссия</button><button id="wlv">К выбору миссии</button><button id="wsh">К улучшениям</button></div></div>
+<div id="end" class="ovl"><div style="max-width:660px;max-height:92vh;overflow:auto"><h2 id="eh">ВЕЧНАЯ ЦИТАДЕЛЬ УСТОЯЛА</h2><div id="et"></div><p><small id="es"></small></p><button id="em">В главное меню</button><button id="eu">Бесконечная осада</button></div></div>
+<div id="toast"></div>
+<div id="bes" class="ovl"><div style="max-width:800px;max-height:90vh;overflow:auto"><h2>Бестиарий Кулаков</h2><div id="bg"></div><button id="bcl">Закрыть</button></div></div>
+<div id="sty" class="ovl"><div><h2 id="sth"></h2><canvas id="stc" width="120" height="90"></canvas><p id="stt"></p><button id="stb">Продолжить</button></div></div>
+<div id="ov"><div><h2 id="ot"></h2><p id="od"></p><button id="rs">Начать заново</button> <button id="sh2">К улучшениям</button> <button id="slv">К выбору миссии</button></div></div>
+<script>
+const T=20,W=40,H=24,CW=W*T,CH=H*T,GX=(W-2)*T,$=id=>document.getElementById(id),cv=$('cv');let c=cv.getContext('2d');
+const ST={
+ wall:{n:'Стена',cost:5,hp:220,d:'Тяни, чтобы строить'},
+ gun:{n:'Автопушка',cost:40,hp:110,dmg:4,rng:100,rate:.14,col:'#9aa3a8',d:'Скорострельная'},
+ mortar:{n:'Миномёт',cost:70,hp:110,dmg:16,rng:170,rate:1.2,spl:34,col:'#b08a3e',ng:1,d:'По площади'},
+ lance:{n:'Лэнс',cost:90,hp:110,dmg:22,rng:210,rate:1.4,col:'#c8553d',d:'Пробивает ряд'},
+ flame:{n:'Огнемёт',cost:60,hp:110,dmg:3,rng:58,rate:.12,col:'#ff7a2a',ng:1,d:'Жжёт вокруг'},
+ mine:{n:'Мина',cost:25,trap:1,col:'#e3b021',d:'Взрыв при касании'},
+ wire:{n:'Проволока',cost:12,trap:1,hp:300,col:'#9aa3a8',d:'Замедляет, но изнашивается'},
+ tesla:{n:'Громовая катушка',cost:110,hp:110,dmg:16,rng:115,rate:.9,col:'#8fd0ff',act:2,d:'Цепная молния'},
+ servo:{n:'Сервитор-ремонтник',cost:80,hp:100,col:'#6cff9a',act:2,d:'Чинит постройки рядом'},
+ rail:{n:'Рельсотрон',cost:220,hp:130,dmg:230,rng:330,rate:3.2,col:'#9ad0ff',act:3,d:'Пробивает всю линию'},
+ plasma:{n:'Плазменный миномёт',cost:180,hp:120,dmg:50,rng:230,rate:2.4,col:'#b06aff',act:3,ng:1,d:'Оставляет горящую землю'}};
+const EN={
+ marine:{r:3.5,hp:14,sp:38,wd:2.5,rew:.5,leak:1},
+ term:{r:7,hp:70,sp:28,wd:7,rew:3,leak:3},
+ dread:{r:9,hp:420,sp:20,wd:30,rew:20,leak:10},
+ dorn:{r:15,hp:9000,sp:15,wd:90,rew:400,leak:40},
+ jump:{r:4,hp:11,sp:72,wd:2,rew:.6,leak:1},
+ dev:{r:6,hp:60,sp:24,wd:3,rew:4,leak:2,nb:1,shoot:110,dps:7},
+ chap:{r:6.5,hp:130,sp:30,wd:2,rew:6,leak:3,nb:1,heal:1},
+ ram:{r:8,hp:260,sp:52,wd:42,rew:10,leak:6},
+ bulwark:{r:7.5,hp:150,sp:26,wd:5,rew:8,leak:3,nb:1,pr:.3},
+ pod:{r:9,hp:150,sp:0,wd:0,rew:3,leak:0,nb:1},
+ scout:{r:4.5,hp:45,sp:62,wd:6,rew:5,leak:2,stl:1},
+ champ:{r:9,hp:520,sp:30,wd:30,rew:16,leak:6,dash:1},
+ hawk:{r:9,hp:260,sp:52,wd:0,rew:12,leak:5,nb:1,air:1},
+ raider:{r:14,hp:1500,sp:24,wd:30,rew:40,leak:12,nb:1,shoot:140,dps:16}};
+const CL={marine:['#6b4e0d','#f0bd25'],jump:['#6b5a1a','#ffe98a'],dev:['#2a4a66','#9ad0ff'],chap:['#1f5a2a','#7be07b'],ram:['#6a1c10','#ff5a3a'],term:['#6b4e0d','#f0bd25'],dread:['#6b4e0d','#f0bd25'],dorn:['#7a6a20','#fff0a0']};
+Object.assign(CL,{marine:['#6b4e0d','#f0bd25'],jump:['#3a382c','#f4f0cf'],term:['#2e2005','#c98a12'],dread:['#2a1d05','#9a7420'],dev:['#0f2c47','#58b4ff'],chap:['#0f4a1d','#69e07a'],ram:['#4a0f06','#ff4a2a'],dorn:['#7a6a20','#ffe680'],bulwark:['#44484d','#c9ced4'],pod:['#2a2a2a','#7a7f86'],scout:['#16221c','#3d5a4a'],champ:['#6b4e0d','#ffd23a'],hawk:['#3a3a30','#d9b84a'],raider:['#2d2406','#bf9420']});
+const mixc=(h,m,k)=>{const a=parseInt(h.slice(1),16),b=parseInt(m.slice(1),16),f=q=>((a>>q&255)*(1-k)+(b>>q&255)*k)|0;return'#'+((1<<24)+(f(16)<<16)+(f(8)<<8)+f(0)).toString(16).slice(1)};
+const CI={};for(const t in CL)CI[t]=[mixc(CL[t][0],'#0c0c0e',.6),mixc(CL[t][1],'#7d838b',.7)];CI.dorn=['#1c1e22','#8f9aa3'];
+const KS=[];for(const t in EN)KS.push(t,t+'b');
+const QUOTES=['Стены не лгут. Лгут только люди.','Пусть золото разбивается о железо.','Каждая стена — аргумент.','Расчёт. Только расчёт.','Они текут как вода. Я построю плотину.'];
+const D=new Float32Array(W*H),G=new Array(W*H),TG=new Array(W*H);let paused=false;
+const UP=[
+ ['dmg','Калибр','+12% урона орудий',8,1.55,30],
+ ['rate','Автозаряжание','+8% скорострельности',10,1.55,25],
+ ['rng','Дальнометрия','+5% дальности',12,1.6,15],
+ ['hp','Адамантиевая кладка','+15% прочности построек',8,1.5,30],
+ ['regen','Сервиторы-ремонтники','Постройки чинятся сами между волнами',15,1.6,15],
+ ['cost','Склады Круга','−4% цены построек',12,1.6,12],
+ ['inc','Рабский труд','+12% ресурсов',10,1.5,30],
+ ['start','Запасы','+60 стартовых ресурсов',6,1.5,25],
+ ['strike','Орбитальная батарея','Гнев: +20% урона, быстрее перезарядка',14,1.6,15],
+ ['cit','Бастионы цитадели','+8 прочности цитадели',10,1.5,20]];
+let SV={ad:0,up:{},best:0},M={},shK='';
+try{const o=JSON.parse(localStorage.getItem('ironflood1'));if(o&&o.up)SV=o}catch(e){}
+function fixSV(){SV.cfg=Object.assign({sv:.7,mv:.5,ash:1,vig:1,grid:1},SV.cfg||{});SV.st=Object.assign({kills:0,mw:0,mines:0,strikes:0,dorn:0,nl:0},SV.st||{});SV.ac=SV.ac||{}}fixSV();
+const save=()=>{try{localStorage.setItem('ironflood1',JSON.stringify(SV))}catch(e){}};
+const lv=k=>SV.up[k]||0,ucost=u=>Math.ceil(u[3]*Math.pow(u[4],lv(u[0])));
+let ATK=0;function calc(){M={dmg:(1+.12*lv('dmg'))*(1+.15*(SV.sh||0)),rate:1+.08*lv('rate'),rng:1+.05*lv('rng'),hp:1+.15*lv('hp'),regen:.004*lv('regen'),cost:Math.max(.4,1-.04*lv('cost')),inc:(1+.12*lv('inc'))*(1+.15*(SV.sh||0)),adm:1+.1*(SV.sh||0),start:300+60*lv('start'),sdm:1+.2*lv('strike'),scd:Math.max(10,30-1.5*lv('strike')),cit:40+8*lv('cit')};if(ATK)Object.assign(M,{dmg:.7,rate:1,rng:1,hp:1,regen:0,cost:1,inc:1,start:300,sdm:1,scd:30,cit:60})}
+calc();
+const pc=k=>Math.max(1,Math.ceil(ST[k].cost*M.cost));
+let AC=null,sG,mG,mstep=0,prc=0;
+function audio(){if(AC){if(AC.state=='suspended')AC.resume();return}
+ try{AC=new(window.AudioContext||window.webkitAudioContext)();sG=AC.createGain();mG=AC.createGain();sG.connect(AC.destination);mG.connect(AC.destination);const dl=AC.createDelay(),fb=AC.createGain(),lp=AC.createBiquadFilter(),wt=AC.createGain();dl.delayTime.value=.27;fb.gain.value=.38;lp.frequency.value=1500;wt.gain.value=.3;sG.connect(wt);mG.connect(wt);wt.connect(dl);dl.connect(lp);lp.connect(fb);fb.connect(dl);lp.connect(AC.destination);setVol();setInterval(music,230)}catch(e){AC=null}}
+function setVol(){if(AC){sG.gain.value=SV.so?0:SV.cfg.sv;mG.gain.value=SV.mo?0:SV.cfg.mv}}
+function tn(f,d,ty,v,f2,dst,dl){const a=AC.currentTime+(dl||0),o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.setValueAtTime(f,a);if(f2)o.frequency.exponentialRampToValueAtTime(f2,a+d);g.gain.setValueAtTime(v,a);g.gain.exponentialRampToValueAtTime(.0001,a+d);o.connect(g);g.connect(dst||sG);o.start(a);o.stop(a+d)}
+function nz(d,v,fq,dst){const n=AC.sampleRate*d|0,b=AC.createBuffer(1,n,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const q=AC.createBufferSource();q.buffer=b;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=fq;const g=AC.createGain();g.gain.value=v;q.connect(f);f.connect(g);g.connect(dst||sG);q.start()}
+function nf(d,v,f0,f1,ty,dst,dl){const a=AC.currentTime+(dl||0),n=AC.sampleRate*d|0,b=AC.createBuffer(1,n,AC.sampleRate),o=b.getChannelData(0);for(let i=0;i<n;i++)o[i]=(Math.random()*2-1)*Math.pow(1-i/n,1.5);const q=AC.createBufferSource();q.buffer=b;const f=AC.createBiquadFilter();f.type=ty||'lowpass';f.frequency.setValueAtTime(f0,a);f.frequency.exponentialRampToValueAtTime(Math.max(30,f1),a+d);const g=AC.createGain();g.gain.value=v;q.connect(f);f.connect(g);g.connect(dst||sG);q.start(a)}
+function sw(f,d,v,ty,dst,cut){const a=AC.currentTime,o=AC.createOscillator(),fl=AC.createBiquadFilter(),g=AC.createGain();o.type=ty;o.frequency.value=f;fl.type='lowpass';fl.frequency.value=cut||600;g.gain.setValueAtTime(.0001,a);g.gain.linearRampToValueAtTime(v,a+d*.35);g.gain.linearRampToValueAtTime(.0001,a+d);o.connect(fl);fl.connect(g);g.connect(dst||sG);o.start(a);o.stop(a+d)}
+const SG={zap:80,servo:300,bomb:100,dash:300,plasma:150,rail:200,plasmaB:120,gun:60,mort:140,lance:110,flame:180,boom:90,crumble:140,build:50,alarm:700,click:40},lastS={};
+function sfx(k){if(!AC||SV.so)return;const n=performance.now();if(n-(lastS[k]||0)<(SG[k]||0))return;lastS[k]=n;const rv=1+Math.random()*.2;
+ ({gun:()=>{nf(.05,.09,2600*rv,900,'bandpass');tn(170*rv,.04,'square',.03,70)},
+ mort:()=>{tn(125,.32,'sine',.22,36);nf(.28,.16,1000,160)},
+ lance:()=>{tn(1500,.24,'sawtooth',.05,90);nf(.22,.08,3500,500,'bandpass');tn(55,.3,'sine',.15,40)},
+ flame:()=>nf(.18,.05,1400,350,'bandpass'),
+ boom:()=>{nf(.6,.3,1400,70);tn(72,.5,'sine',.28,26)},
+ crumble:()=>{nf(.45,.18,800,140);tn(60,.25,'sine',.15,30)},
+ build:()=>{tn(340,.07,'square',.05,170);nf(.05,.06,3000,1200,'bandpass');tn(620,.05,'triangle',.04,0,0,.05)},
+ up:()=>{tn(440,.15,'triangle',.08);tn(660,.25,'triangle',.08,0,0,.1);tn(990,.3,'sine',.04,0,0,.2)},
+ buy:()=>{tn(620,.1,'triangle',.07);tn(930,.22,'triangle',.07,0,0,.08)},
+ horn:()=>{sw(98,2,.22,'sawtooth',0,420);sw(147,2,.14,'sawtooth',0,420);sw(49,2,.18,'sine')},
+ win:()=>{[330,415,495,660].forEach((f,i)=>tn(f,.4,'triangle',.08,0,0,i*.13))},
+ alarm:()=>{tn(320,.18,'square',.05,300);tn(220,.18,'square',.05,200,0,.2)},
+ over:()=>{sw(55,3,.3,'sawtooth',0,300);sw(41,3.2,.25,'sine');nf(1.4,.2,600,60)},
+ strike:()=>{tn(180,.55,'sawtooth',.07,1900);nf(.9,.4,1600,60,'lowpass',0,.5);tn(60,.9,'sine',.35,22,0,.5)},
+ sting:()=>{sw(70,1.6,.2,'sawtooth',0,400);sw(74,1.6,.18,'sawtooth',0,400);tn(1200,.5,'sine',.03,0,0,.1)},
+ story:()=>{tn(196,1.2,'sine',.1);tn(293,1.4,'sine',.07,0,0,.15)},
+ click:()=>tn(900,.03,'square',.025,500),
+ zap:()=>{nf(.12,.09,5000,700,'highpass');tn(1800,.1,'sawtooth',.04,200)},
+ rail:()=>{tn(80,.5,'sawtooth',.1,600);nf(.12,.3,6000,300,'bandpass',0,.35);tn(1200,.35,'square',.06,40,0,.35)},
+ plasma:()=>{tn(300,.35,'sine',.1,900);nf(.2,.06,2500,400,'bandpass')},
+ plasmaB:()=>{nf(.5,.28,2000,100);tn(140,.5,'sawtooth',.1,40)},
+ servo:()=>{tn(1400,.05,'square',.03);tn(1900,.06,'square',.03,0,0,.07)},
+ whistle:()=>tn(2200,.9,'sine',.05,500),
+ bomb:()=>{tn(900,.25,'sine',.05,200);nf(.35,.2,900,120,'lowpass',0,.22)},
+ jet:()=>nf(.9,.1,500,3000,'bandpass'),
+ snap:()=>{tn(1700,.05,'square',.03,600);nf(.06,.06,4000,1500,'highpass')},
+ dash:()=>{nf(.25,.14,600,3500,'bandpass');tn(220,.25,'sawtooth',.05,880)}})[k]?.()}
+const BASS=[73.4,73.4,87.3,73.4,65.4,65.4,82.4,73.4],LEAD=[293.7,349.2,293.7,261.6,220,246.9,261.6,196];
+function music(){if(!AC||SV.mo||(paused&&$('menu').style.display!='flex'))return;const i=mstep++,busy=S&&S.busy,k=i%16,rt=[55,49,58.3,51.9][(i>>4)%4];
+ if(k==0){for(const m of[1,1.006,1.5])sw(rt*m*2,4.4,.05,'sawtooth',mG,520)}
+ if(k==8&&!busy)sw(rt*8,2.6,.05,'sine',mG,2000);
+ if(busy){if(k%4==0){tn(rt*2,.22,'sawtooth',.06,0,mG);tn(92,.2,'sine',.32,30,mG)}
+  if(k%8==4){nf(.09,.14,2200,500,'bandpass',mG);tn(210,.12,'square',.035,80,mG)}
+  if(k%2==1)nf(.03,.035,7000,5000,'highpass',mG);
+  if(S.E.length>60&&(k==6||k==14))sw(rt*6,.9,.05,'triangle',mG,2500)}}
+function pgain(){return Math.floor(Math.pow(Math.max(0,SV.best-9),1.4))}
+function prestige(){const g=pgain();if(g<1)return;if(!prc){prc=1;updShop(true);setTimeout(()=>{prc=0;updShop(true)},3000);return}
+ SV.sh=(SV.sh||0)+g;SV.up={};SV.ad=0;SV.best=0;prc=0;save();init();updShop(true)}
+const LQ={marine:1};
+const EI={
+marine:{n:'Тактический десантник',d:'Основа войска Кулаков. Слабы поодиночке, но текут сплошным золотым потоком и давят числом. Лучшая цель для миномётов и лэнсов.'},
+brk:{n:'Сапёр (оранжевый)',d:'Десантник с мельта-зарядом за спиной. Игнорирует лабиринт и идёт прямо на ближайшую постройку, ломая её в 2,5 раза быстрее. Встречай огнём и проволокой.'},
+jump:{n:'Штурмовик с ранцем',d:'Быстрый клиновидный силуэт, обгоняет волну. Хрупкий: хорошо косится автопушкой и огнемётом.'},
+term:{n:'Терминатор',d:'Тяжёлая броня и белые наплечники. Медленный, но живучий: нужен мощный урон, например лэнс.'},
+dev:{n:'Девастатор',d:'Синяя броня и тяжёлый ствол. Останавливается и расстреливает постройки издали (виден красный луч). Убивай дальними орудиями.'},
+chap:{n:'Капеллан',d:'Зелёная ряса с белым крестом и нимбом. Лечит окружающих врагов. Приоритетная цель.'},
+ram:{n:'Таран «Носорог»',d:'Красная гусеничная машина с клином. Всегда идёт напролом на стены и ломает их очень быстро. Встречай минами и сосредоточенным огнём.'},
+dread:{n:'Дредноут',d:'Шагающий гигант с кулаком и орудием. Очень прочный, ломает постройки. Нужны лэнсы и улучшенные орудия.'},
+dorn:{n:'Рогал Дорн',d:'Примарх Имперских Кулаков в золотой броне и красном плаще. Приходит каждую 15-ю волну, очень прочен и крушит всё на пути.'},
+bulwark:{n:'Щитоносец',d:'Серебристая броня и голубой щит. Его поле снижает урон по союзникам вокруг на 35%. Убивай первым, пока он не прикрыл строй.'},
+pod:{n:'Десантная капсула',d:'Падает рядом с постройками (красная метка), при ударе повреждает их, а через 3 секунды раскрывается и выпускает 8 десантников. Успей разбить её до открытия.'},
+scout:{n:'Скаут-инфильтратор',d:'Почти невидимая тень: орудия замечают его только вблизи. Быстрый, бьёт по постройкам. Помогают мины, огнемёты и молнии.'},
+champ:{n:'Чемпион Кулаков',d:'Золотая броня, красный плюм и силовой клинок. Каждые 4 секунды рывком втрое ускоряется и наносит стенам тройной урон.'},
+hawk:{n:'Громовой ястреб',d:'Летит над скалами и стенами прямо к цитадели и бомбит постройки под собой. Миномёты, огнемёты и плазма его не достают: нужны автопушки, катушки, лэнсы и рельсотроны.'},
+raider:{n:'Лэнд Рейдер',d:'Тяжёлая машина с орудием, расстреливает постройки издали. Уничтоженный, выпускает 8 десантников.'}};
+const BK=['marine','brk','jump','term','dev','chap','ram','dread','dorn','bulwark','pod','scout','champ','hawk','raider'];
+function unit(t,x,y,a,br,sc,e){const r=EN[t].r*(sc||1),col=(LV.iw&&!sc?CI:CL)[t];
+ c.save();c.translate(x,y);if(!EN[t].air){c.fillStyle='#0007';c.beginPath();c.ellipse(1,r*.5,r*1.1,r*.6,0,0,7);c.fill()}else{c.fillStyle='#0004';c.beginPath();c.ellipse(-8,12,r*1.4,r*.5,0,0,7);c.fill()}c.rotate(a);c.lineWidth=1;
+ const D=(q,f)=>{c.fillStyle=f;c.beginPath();c.arc(0,0,q,0,7);c.fill()};
+ if(t=='marine'){if(br){c.fillStyle='#1a1a1a';c.fillRect(-r*1.8,-r*.9,r*1.2,r*1.8);c.fillStyle='#ff8a2a';c.fillRect(-r*1.6,-r*.5,r*.8,r)}
+  D(r+1,br?'#5a2208':col[0]);D(r,br?'#ff8a2a':col[1]);c.fillStyle='#111';c.fillRect(r*.2,-1.5,r*.6,3);if(br)c.fillRect(-r*.2,-r,r*.3,r*2)}
+ else if(t=='jump'){c.fillStyle=col[0];c.beginPath();c.moveTo(r*1.6,0);c.lineTo(-r,-r*1.2);c.lineTo(-r*.3,0);c.lineTo(-r,r*1.2);c.fill();c.fillStyle=col[1];c.beginPath();c.moveTo(r*1.2,0);c.lineTo(-r*.7,-r*.85);c.lineTo(-r*.1,0);c.lineTo(-r*.7,r*.85);c.fill();c.fillStyle='#ff6a2a';c.fillRect(-r*1.5,-r*.6,r*.5,2);c.fillRect(-r*1.5,r*.4,r*.5,2)}
+ else if(t=='term'){D(r+1.5,col[0]);D(r-.5,col[1]);c.fillStyle='#e8e0c0';c.fillRect(-r*.5,-r-3,r,5);c.fillRect(-r*.5,r-2,r,5);c.fillStyle='#111';c.fillRect(r*.2,-2,r*.6,4)}
+ else if(t=='dev'){c.fillStyle='#2a2a2a';c.fillRect(-r*1.5,-r*.7,r*.9,r*1.4);D(r+1,col[0]);D(r-.5,col[1]);c.fillStyle='#333';c.fillRect(0,-2,r*2.3,4);c.fillStyle='#ff5a3a';c.fillRect(r*2.1,-1.5,3,3);c.fillStyle='#111';c.fillRect(r*.1,-r*.9,r*.6,2)}
+ else if(t=='chap'){c.strokeStyle='#bfb8a0';c.lineWidth=2;c.beginPath();c.moveTo(-r*1.3,r*.9);c.lineTo(r*1.3,r*.9);c.stroke();D(r+1,col[0]);D(r-.5,col[1]);c.strokeStyle='#f0f0e0';c.lineWidth=1.5;c.beginPath();c.arc(0,0,r+3,0,7);c.stroke();c.fillStyle='#fff';c.fillRect(-1,-r*.55,2,r*1.1);c.fillRect(-r*.55,-1,r*1.1,2)}
+ else if(t=='ram'){c.fillStyle='#222';c.fillRect(-r,-r*.95,r*2,r*.35);c.fillRect(-r,r*.6,r*2,r*.35);c.fillStyle=col[1];c.fillRect(-r,-r*.65,r*1.5,r*1.3);c.fillStyle=col[0];c.beginPath();c.moveTo(r*1.4,0);c.lineTo(r*.5,-r*.65);c.lineTo(r*.5,r*.65);c.fill();c.fillStyle='#e3b021';c.fillRect(-r*.4,-2,r*.7,4)}
+ else if(t=='dread'){c.fillStyle='#222';for(const k of[-1,1]){c.fillRect(-r*.9,k*r*.95-2,r*.7,4);c.fillRect(r*.3,k*r*.95-2,r*.7,4)}c.fillStyle=col[0];c.fillRect(-r,-r*.8,r*2,r*1.6);c.fillStyle=col[1];c.fillRect(-r*.8,-r*.6,r*1.6,r*1.2);c.fillStyle='#555';c.fillRect(r*.3,-r*1.2,r*.9,r*.5);c.fillRect(r*.3,r*.6,r*1.3,r*.4);c.fillStyle='#e33';c.fillRect(r*.5,-2,3,4)}
+ else if(t=='bulwark'){if(e){c.strokeStyle='rgba(120,180,255,'+(.15+.1*Math.sin(performance.now()/250))+')';c.lineWidth=1.5;c.beginPath();c.arc(0,0,50,0,7);c.stroke()}
+  D(r+1,col[0]);D(r-.5,col[1]);c.strokeStyle='#8fd0ff';c.lineWidth=3.5;c.beginPath();c.arc(0,0,r+3,-1.25,1.25);c.stroke();c.fillStyle='#111';c.fillRect(r*.1,-1.5,r*.5,3)}
+ else if(t=='pod'){c.rotate(-a);if(e&&e.fall>0){const k=e.fall/2.2;c.strokeStyle='rgba(255,60,40,'+(.4+.3*Math.sin(performance.now()/90))+')';c.lineWidth=1.5;c.beginPath();c.arc(0,0,36,0,7);c.stroke();c.fillStyle='rgba(255,60,40,.12)';c.fill();
+   c.translate(0,-k*90);c.fillStyle='#5a5a5a';c.beginPath();c.moveTo(0,r*1.3);c.lineTo(r*.7,-r*.8);c.lineTo(-r*.7,-r*.8);c.fill();c.fillStyle='#ff9a3a';c.fillRect(-r*.3,-r*1.6,r*.6,r*.9)}
+  else{D(r+1,col[0]);D(r-1,col[1]);c.fillStyle='#111';c.fillRect(-r*.3,-r*.8,r*.6,r*1.6);if(e){c.strokeStyle='#ffb347';c.lineWidth=2;c.beginPath();c.arc(0,0,r+3,-1.57,-1.57+6.283*(1-e.op/3));c.stroke()}}}
+ else if(t=='scout'){c.globalAlpha=.55+.25*Math.sin(performance.now()/180+x);c.fillStyle=col[0];c.beginPath();c.moveTo(r*1.2,0);c.lineTo(-r*1.5,-r*.95);c.lineTo(-r*.8,0);c.lineTo(-r*1.5,r*.95);c.fill();D(r*.75,col[1]);c.fillStyle='#9affc8';c.fillRect(r*.2,-1,r*.55,2)}
+ else if(t=='champ'){if(e&&e.bs>0){c.fillStyle='rgba(255,230,128,.25)';c.fillRect(-r*3.5,-r*.8,r*2.6,r*1.6);c.strokeStyle='rgba(255,230,128,.6)';c.lineWidth=3;c.beginPath();c.arc(0,0,r+5,0,7);c.stroke()}
+  D(r+1.5,col[0]);D(r-.5,col[1]);c.fillStyle='#e03030';c.fillRect(-r*.3,-r-4,r*.7,5);c.strokeStyle=(e&&e.bs>0)?'#fff':'#ffe680';c.lineWidth=2.5;c.beginPath();c.moveTo(r*.4,r*.7);c.lineTo(r*2.1,r*.7);c.stroke();c.fillStyle='#111';c.fillRect(r*.25,-2,r*.55,4)}
+ else if(t=='hawk'){c.fillStyle=col[0];c.beginPath();c.moveTo(r*.4,0);c.lineTo(-r*.6,-r*1.8);c.lineTo(-r*1,-r*1.8);c.lineTo(-r*.5,0);c.lineTo(-r*1,r*1.8);c.lineTo(-r*.6,r*1.8);c.fill();
+  c.beginPath();c.ellipse(0,0,r*1.5,r*.5,0,0,7);c.fill();c.fillStyle=col[1];c.beginPath();c.ellipse(r*.2,0,r*1.1,r*.35,0,0,7);c.fill();c.fillStyle='#111';c.fillRect(r*.7,-2,r*.4,4);c.fillStyle='#ff9a3a';c.fillRect(-r*1.7,-2,r*.4+Math.sin(performance.now()/40)*2,4)}
+ else if(t=='raider'){c.fillStyle='#222';c.fillRect(-r*1.1,-r,r*2.2,r*.4);c.fillRect(-r*1.1,r*.6,r*2.2,r*.4);c.fillStyle=col[0];c.fillRect(-r*1.1,-r*.65,r*2.2,r*1.3);c.fillStyle=col[1];c.fillRect(-r*.9,-r*.5,r*1.5,r);
+  c.fillStyle='#555';c.fillRect(r*.2,-r*.9,r*.9,r*.3);c.fillRect(r*.2,r*.6,r*.9,r*.3);D(r*.5,col[0]);c.fillStyle='#333';c.fillRect(0,-2,r*1.6,4);if(e&&e.sh){c.fillStyle='#ffd85a';c.beginPath();c.arc(r*1.7,0,5,0,7);c.fill()}}
+ else{c.fillStyle=LV.iw&&!sc?'#2a2a2a':'#8a1c1c';c.beginPath();c.moveTo(-r*.5,-r*.9);c.lineTo(-r*1.9,0);c.lineTo(-r*.5,r*.9);c.fill();c.strokeStyle=LV.iw&&!sc?'#d9a52199':'#ffd23a66';c.lineWidth=2;c.beginPath();c.arc(0,0,r+4,0,7);c.stroke();D(r+1.5,col[0]);D(r-1,col[1]);c.fillStyle='#8f9aa3';c.fillRect(r*.3,r*.5,r*1.6,3);c.fillStyle='#111';c.fillRect(r*.35,-2.5,r*.5,5)}
+ c.restore()}
+function big(e){const t=e.type,r=EN[t].r,a=e.sh?Math.atan2(e.sg.y-e.y,e.sg.x-e.x):(Math.atan2(e.vy,e.vx)||0);unit(t,e.x,e.y,a,e.br,1,e);
+ if(t=='dread'||t=='dorn'||t=='raider'){c.fillStyle='#300';c.fillRect(e.x-r,e.y-r-6,r*2,3);c.fillStyle='#6c6';c.fillRect(e.x-r,e.y-r-6,r*2*Math.max(0,e.hp/e.max),3)}}
+function spriteTo(cn,t){const m=c;c=cn.getContext('2d');c.clearRect(0,0,cn.width,cn.height);if(ST[t]){c.save();c.translate(cn.width/2,cn.height/2);c.scale(3.4,3.4);base(1);turret({type:t,ang:0,fl:0,lv:1},ST[t]);c.restore();c=m;return}unit(t=='brk'?'marine':t,cn.width/2,cn.height/2,0,t=='brk',t=='dorn'?2:t=='dread'?2.6:t=='ram'?3:t=='term'||t=='chap'||t=='dev'?3.4:4.2);c=m}
+const BG=document.createElement('canvas');BG.width=CW;BG.height=CH;
+function mkBG(){const g=BG.getContext('2d'),gr=g.createLinearGradient(0,0,CW,0);gr.addColorStop(0,'#1f1a14');gr.addColorStop(.5,'#181512');gr.addColorStop(1,'#14110f');g.fillStyle=gr;g.fillRect(0,0,CW,CH);
+ let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;
+ for(let i=0;i<2600;i++){g.fillStyle=rnd()<.5?'rgba(0,0,0,.25)':'rgba(120,90,50,.07)';g.fillRect(rnd()*CW,rnd()*CH,1+rnd()*3,1+rnd()*2)}
+ for(let i=0;i<14;i++){const x=80+rnd()*600,y=20+rnd()*440,r=6+rnd()*16;g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(x,y,r,r*.7,0,0,7);g.fill();g.strokeStyle='rgba(150,110,60,.16)';g.lineWidth=2;g.stroke()}
+ g.strokeStyle='rgba(0,0,0,.4)';g.lineWidth=1;for(let i=0;i<18;i++){let x=rnd()*CW,y=rnd()*CH;g.beginPath();g.moveTo(x,y);for(let k=0;k<5;k++){x+=rnd()*30-8;y+=rnd()*24-12;g.lineTo(x,y)}g.stroke()}
+ for(const z of SZ){g.fillStyle='#0c0a08';g.fillRect(z[0]*T,z[1]*T,z[2]*T,z[3]*T)}for(const r of RK)rockDraw(g,r,rnd)}
+const ASH=Array.from({length:40},()=>({x:Math.random()*CW,y:Math.random()*CH,v:.2+Math.random()*.4,s:1+Math.random()*1.5}));
+function base(f){const h=T/2,k=4;c.fillStyle='#202428';c.beginPath();c.moveTo(-h+k,-h);c.lineTo(h-k,-h);c.lineTo(h,-h+k);c.lineTo(h,h-k);c.lineTo(h-k,h);c.lineTo(-h+k,h);c.lineTo(-h,h-k);c.lineTo(-h,-h+k);c.closePath();c.fill();
+ c.strokeStyle=f<.5?'#c44':'#5a626a';c.lineWidth=1.2;c.stroke();
+ for(let i=0;i<4;i++){c.fillStyle=i%2?'#111':'#d9a521';c.fillRect(-h+2+i*4.5,h-4,4.5,2.5)}
+ c.fillStyle='#31373d';c.beginPath();c.arc(0,0,7.8,0,7);c.fill();c.strokeStyle='#14161a';c.lineWidth=1;c.stroke()}
+function wall(t,f){const x=t.cx,y=t.cy,n=(dx,dy)=>{const X=x+dx,Y=y+dy;if(X<0||Y<0||X>=W||Y>=H)return 0;const q=G[Y*W+X];return q&&q.type=='wall'};
+ const h=T/2,dk=1-f;c.fillStyle='rgb('+(62+dk*70|0)+','+(68-dk*25|0)+','+(74-dk*35|0)+')';c.fillRect(-h,-h,T,T);
+ c.fillStyle='#ffffff14';if(!n(0,-1))c.fillRect(-h,-h,T,3);c.fillStyle='#0006';if(!n(0,1))c.fillRect(-h,h-3,T,3);
+ c.strokeStyle='#14161a';c.lineWidth=1;c.strokeRect(-h+.5,-h+.5,T-1,T-1);
+ c.fillStyle='#8a8f96';for(const[a,b]of[[-6,-6],[6,-6],[-6,6],[6,6]])c.fillRect(a-1,b-1,2,2);
+ if(f<.66){c.strokeStyle='#000c';c.beginPath();c.moveTo(-6,-8);c.lineTo(-1,-2);c.lineTo(-5,4);c.stroke()}
+ if(f<.33){c.strokeStyle='#000c';c.beginPath();c.moveTo(7,-7);c.lineTo(2,1);c.lineTo(8,7);c.stroke();c.fillStyle='#b4532a55';c.fillRect(-h,-h,T,T)}}
+function turret(t,d){const k=t.type,rc=t.fl>0?1:0,chg=t.cd>0?Math.max(0,1-t.cd/(d.rate/M.rate)):1;c.rotate(t.ang);
+ c.fillStyle='#2f353b';c.beginPath();c.arc(0,0,6.5,0,7);c.fill();
+ if(k=='gun'){c.fillStyle='#5b636b';c.fillRect(-5-rc,-5,6,10);c.fillStyle=d.col;c.fillRect(1-rc*2,-4.5,10,2.2);c.fillRect(1-rc*2,2.3,10,2.2);
+  c.fillStyle='#1b1d20';c.fillRect(9-rc*2,-5,3,3);c.fillRect(9-rc*2,2,3,3);c.fillStyle='#8a5a1a';c.fillRect(-7,-3,3,6);
+  if(rc){c.fillStyle='#ffd85a';c.beginPath();c.arc(14,-3.4,2.4,0,7);c.arc(14,3.4,2.4,0,7);c.fill()}}
+ else if(k=='mortar'){c.fillStyle='#4a4430';c.fillRect(-7,-6,6,12);c.fillStyle=d.col;c.fillRect(-2-rc*3,-4,11,8);c.fillStyle='#2a2418';c.fillRect(8-rc*3,-5,3,10);c.fillStyle='#d9a521';c.fillRect(1-rc*3,-4,1.5,8);
+  if(rc){c.fillStyle='#ffb347';c.beginPath();c.arc(13,0,3.5,0,7);c.fill();c.fillStyle='#fff3c0';c.beginPath();c.arc(12,0,1.6,0,7);c.fill()}}
+ else if(k=='lance'){c.fillStyle='#3a4046';c.fillRect(-4,-4,7,8);c.fillStyle='#222';c.fillRect(2,-2,16,4);const gl=rc?1:.45+.25*Math.sin(performance.now()/300);
+  for(let i=4;i<16;i+=4){c.fillStyle=d.col;c.fillRect(i,-3.8,2,7.6)}
+  c.fillStyle='rgba(255,120,60,'+gl+')';c.beginPath();c.arc(-1,0,2.6,0,7);c.fill();c.fillStyle='rgba(255,190,140,'+gl+')';c.fillRect(17,-1.6,3,3.2);
+  if(rc){c.fillStyle='#ffcfa0';c.beginPath();c.arc(21,0,3,0,7);c.fill()}}
+ else if(k=='tesla'){c.fillStyle='#3a4a5a';c.fillRect(-4,-4,8,8);c.strokeStyle=d.col;c.lineWidth=1.5;for(let i=0;i<3;i++){c.beginPath();c.arc(1,0,2.5+i*2,-1.2,1.2);c.stroke()}c.fillStyle='#cfd6da';c.fillRect(4,-1,6,2);c.fillStyle='rgba(160,220,255,'+(rc?1:.4+.3*Math.sin(performance.now()/150))+')';c.beginPath();c.arc(11,0,rc?4:2.6,0,7);c.fill()}
+ else if(k=='servo'){c.fillStyle='#2d4a36';c.beginPath();c.arc(0,0,6,0,7);c.fill();c.fillStyle=d.col;c.fillRect(0,-1.5,12,3);c.fillRect(10,-4,3,8);c.strokeStyle='#6cff9a66';c.lineWidth=1;c.beginPath();c.arc(0,0,9,0,7);c.stroke();c.fillStyle='#fff';c.fillRect(-1,-4,2,8);c.fillRect(-4,-1,8,2)}
+ else if(k=='rail'){c.fillStyle='#2a2f35';c.fillRect(-6,-5,9,10);c.fillStyle='#555d66';c.fillRect(2,-4,20,2);c.fillRect(2,2,20,2);for(let i=0;i<chg*5;i++){c.fillStyle='rgba(154,208,255,'+(.4+chg*.5)+')';c.fillRect(4+i*3.5,-2,2,4)}c.fillStyle='rgba(154,208,255,'+(rc?1:chg)+')';c.beginPath();c.arc(22,0,2+chg*2+rc*2,0,7);c.fill()}
+ else if(k=='plasma'){c.fillStyle='#3a2a52';c.beginPath();c.arc(-2,0,6,0,7);c.fill();c.fillStyle='#555';c.fillRect(2,-4,10,8);c.fillStyle='#1b1030';c.fillRect(11,-5,2,10);c.fillStyle='rgba(176,106,255,'+(.5+.4*chg)+')';c.beginPath();c.arc(-2,0,3,0,7);c.fill();if(rc){c.fillStyle='#e0b8ff';c.beginPath();c.arc(14,0,4,0,7);c.fill()}}
+ else{c.fillStyle='#7a3410';c.beginPath();c.arc(-3,0,5.5,0,7);c.fill();c.fillStyle='#a9501a';c.fillRect(-6,-1,6,2);c.fillStyle='#555';c.fillRect(2,-2,8,4);c.fillStyle='#222';c.fillRect(9,-3,2,6);
+  c.fillStyle=rc?'#ff9a2a':'#ffb347';c.beginPath();c.arc(12,0,rc?4.5:2,0,7);c.fill();if(rc){c.fillStyle='#ff4a1a88';c.beginPath();c.arc(16,0,6,0,7);c.fill()}}
+ c.fillStyle=d.col;c.beginPath();c.arc(0,0,2.2,0,7);c.fill()}
+const HOW='Строить, улучшать, чинить и разбирать можно только между волнами. Оранжевые Кулаки лезут напролом на стены, голубые девастаторы бьют издали, зелёные капелланы лечат. Адамантий за волны тратится в кузнях, улучшения остаются навсегда. С 10-й волны доступно Вознесение. Масштаб: колесо мыши или кнопки ＋ －, перетаскивание правой кнопкой, стрелки или щипок на телефоне. Клик правой кнопкой без перетаскивания (или Esc) отменяет выбор постройки.';
+const STORY={
+1:['Первая волна','Дорн послал вперёд пехоту проверить прочность стен. «Пусть считают шаги, — говорит Пертурабо. — Я уже посчитал каждый».'],
+3:['Упорство Дорна','Часть Кулаков идёт напролом на стены: Дорн верит, что любую преграду можно сломать упорством. Пертурабо верит, что упорство тоже можно просчитать.'],
+5:['Голоса с орбиты','Девастаторы бьют издали, капелланы читают литании и штопают раненых. «Они молятся — значит, у них кончаются снаряды», — замечает Пертурабо.'],
+8:['Письмо Дорна','«Брат, сдай цитадель, и Железные Воины сохранят жизнь». Пертурабо бросает послание в плавильню и приказывает возвести ещё одну стену.'],
+10:['Трещина в уверенности','Ни один бастион не вечен, пока не вечны те, кто его строит. Если цитадель падёт, Пертурабо начнёт всё сначала и учтёт каждую ошибку.'],
+15:['Рогал Дорн','Сам Дорн ведёт Кулаков. Два величайших осадных ума Империума сошлись у одних стен. «Один из нас перепишет эту войну», — говорит Пертурабо.'],
+20:['Осада без конца','Орбита полна новых десантных капсул. Цитадель не падёт, пока в ней осталась хоть одна непроломленная стена.'],
+30:['Вечная','Эта осада войдёт в хроники. Вопрос лишь в том, чьё имя в них окажется первым.']};
+function near(e){let b=null,bd=1e12;for(const q of S.T){const w=(q.x-e.x)**2+(q.y-e.y)**2;if(w<bd){bd=w;b=q}}return b}
+function rmT(t){TG[t.cy*W+t.cx]=null;S.TR=S.TR.filter(x=>x!==t)}
+function labels(){document.querySelectorAll('.pc').forEach(e=>e.textContent=pc(e.dataset.c))}
+function buy(k){const u=UP.find(x=>x[0]==k),l=lv(k);if(l>=u[5]||SV.ad<ucost(u))return;SV.ad-=ucost(u);sfx('buy');const oh=M.hp;SV.up[k]=l+1;calc();
+ if(k=='hp'){const q=M.hp/oh;for(const t of S.T){t.max*=q;t.hp*=q}}
+ if(k=='cit')S.hp+=8;save();labels();updShop(true)}
+const ug=$('ug');UP.forEach(u=>{const b=document.createElement('button');b.id='u_'+u[0];b.onclick=()=>buy(u[0]);ug.appendChild(b)});
+function updShop(f){const k=Math.floor(SV.ad)+'|'+JSON.stringify(SV.up)+SV.best+'|'+(SV.sh||0);if(k==shK&&!f)return;shK=k;$('sa').textContent=Math.floor(SV.ad);$('sb').textContent=SV.best;$('ss').textContent=(SV.sh||0)+' (+'+15*(SV.sh||0)+'% урона и ресурсов)';const g=pgain();$('pr').disabled=g<1;$('pr').textContent=prc?'Подтвердить сброс?':'Вознесение: +'+g+' осколков'+(SV.best<10?' (нужна волна 10)':'');
+ for(const u of UP){const b=$('u_'+u[0]),l=lv(u[0]),mx=l>=u[5];b.innerHTML='<b>'+u[1]+'</b> ур. '+l+(mx?' (макс.)':'')+'<br><small>'+u[2]+(mx?'':' — '+ucost(u)+' А')+'</small>';b.disabled=mx||SV.ad<ucost(u)}}
+const DIRS=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+let S,mode='wall',hov=null,down=false,dirty=true,speed=1;
+function field(){D.fill(1e9);const q=[];
+ for(let y=GL[1];y<GL[1]+GL[3];y++)for(let x=GL[0];x<GL[0]+GL[2];x++){const i=y*W+x;D[i]=0;q.push(i)}
+ for(let h=0;h<q.length;h++){const i=q[h],x=i%W,y=i/W|0;
+  for(const[dx,dy]of DIRS){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;
+   if(dx&&dy&&(G[y*W+nx]||G[ny*W+x]))continue;
+   const j=ny*W+nx;if(G[j]&&G[j].rock)continue;const v=D[i]+(dx&&dy?1.41:1)+(G[j]?14:0);
+   if(v<D[j]){D[j]=v;q.push(j)}}}}
+function init(){ATK=LV.atk?1:0;calc();S={gold:LV.atk?LV.gold:M.start+(LV.g||0)+(LV.w0||0)*25,hp:LV.atk?LV.core:M.cit,wave:0,q:[],acc:0,rate:0,T:[],TR:[],E:[],F:[],PJ:[],Z:[],tm:LV.time||0,busy:false,over:false,cd:0};
+ G.fill(null);TG.fill(null);setMap();dirty=true;mode=LV.atk?null:'wall';$('ov').style.display='none';msg('Пертурабо: рельеф — моё оружие. Выстрой лабиринт и Строй до начала волны — во время штурма это невозможно.');$('shop').classList.remove('hot');labels();updShop(true);ui()}
+function msg(t){$('msg').textContent=t}
+function startWave(){if(S.busy||S.over)return;const n=++S.wave,q=[];
+ const m=n+(LV.w0||0),add=(t,k)=>{for(let i=0;i<k*(LV.cm||1)*(LV.w0?Math.min(1,.4+n*.12):1);i++)q.push(t)};
+ add('marine',Math.min(40+m*30,380));if(m>=3)add('term',Math.min((m-2)*4,120));if(m>=6)add('dread',Math.min((m-5)*2,40));if(m>=2)add('jump',Math.min(m*4,100));if(m>=4)add('dev',Math.min(m>>1,30));if(m>=5)add('chap',Math.min(m/3|0,12));if(m>=7)add('ram',Math.min(m-5,25));if(m>=6)add('bulwark',Math.min(m/4|0,12));if(m>=7)add('pod',Math.min((m-5)/2|0,8));if(m>=8)add('scout',Math.min(m-5,40));if(m>=10)add('champ',Math.min(m-9,14));if(m>=11)add('hawk',Math.min((m-9)/1.5|0,12));if(m>=12)add('raider',Math.min((m-11)/2|0,6));
+ q.sort(()=>Math.random()-.5);if(isB(n))q.unshift('dorn');
+ S.q=q;S.rate=q.length/14;S.busy=true;S.lk=0;sfx('horn');$('shop').classList.remove('hot');
+ msg(isB(n)?(LV.iw?'Пертурабо лично возглавил атаку!':'Рогал Дорн ведёт штурм!'):!LV.iw&&n==2?'Оранжевые Кулаки — штурмовики: они прут напрямую на постройки.':!LV.iw&&n==4?'Голубые девастаторы расстреливают постройки издали.':!LV.iw&&n==5?'Зелёные капелланы лечат своих — убивай первыми.':(LV.iw?QD:QUOTES)[n%QUOTES.length]);ui();const sb=LV.id=='endless'?STORY[n]:LV.story&&LV.story[n],sk=LV.id+n;if(sb&&!(SV.seen&&SV.seen[sk])){SV.seen=SV.seen||{};SV.seen[sk]=1;save();story(sb[0],sb[1])}for(const t of [...Object.keys(EN),'brk'])if(!LV.iw&&(t=='brk'?n>=2:q.includes(t))&&!(SV.se&&SV.se[t])){SV.se=SV.se||{};SV.se[t]=1;save();story('Новый враг: '+EI[t].n,EI[t].d,t)}}
+function spawn(t,px,py){const z=SZ[Math.random()*SZ.length|0],d=EN[t],k=(1+.08*(S.wave+(LV.w0||0))+Math.max(0,S.wave+(LV.w0||0)-15)**2*.02)*(LV.hm||1);
+ const e={type:t,x:px??(z[0]+Math.random()*z[2])*T,y:py??(z[1]+Math.random()*z[3])*T,vx:0,vy:0,hp:d.hp*k,max:d.hp*k,br:t=="dorn"||t=="ram"||t=="scout"||t=="champ"||(!EN[t].nb&&Math.random()<Math.min(.4,.04+S.wave*.025))};
+ if(t=='pod'){const q=S.T.length?S.T[Math.random()*S.T.length|0]:null;let x=0,y=0;for(let i=0;i<20;i++){x=Math.max(T,Math.min(CW-T,q?q.x+(Math.random()-.5)*100:Math.random()*CW));y=Math.max(T,Math.min(CH-T,q?q.y+(Math.random()-.5)*100:Math.random()*CH));const cc=(y/T|0)*W+(x/T|0);if(!NB[cc]&&!G[cc])break}e.x=x;e.y=y;e.fall=2.2;e.op=3;sfx('whistle')}
+ if(t=='hawk')sfx('jet');
+ S.E.push(e);return e}
+function build(cx,cy){if(cx<0||cx>=W||cy<0||cy>=H||LV.atk)return;if(S.busy){msg('Идёт штурм: строить, улучшать и чинить можно только между волнами.');return}const i=cy*W+cx,s=G[i];if(NB[i]||(s&&s.rock))return;
+ if(mode=='sell'){if(s){S.gold+=Math.floor(ST[s.type].cost*.6);kill(s)}else if(TG[i]){S.gold+=Math.floor(ST[TG[i].type].cost*.6);rmT(TG[i])}return}
+ if(mode=='repair'){if(s&&s.hp<s.max){const p=Math.max(1,Math.ceil((1-s.hp/s.max)*ST[s.type].cost*.5));
+   if(S.gold>=p){S.gold-=p;s.hp=s.max}else msg('Не хватает ресурсов на ремонт ('+p+').')}return}
+ if(mode=='upg'){if(s&&s.lv<3){const u=Math.ceil(pc(s.type)*(.8+.5*s.lv));if(S.gold>=u){S.gold-=u;s.lv++;s.max*=1.35;s.hp*=1.35;sfx('up')}else msg('Для улучшения нужно '+u+' ресурсов.')}return}
+ const d=ST[mode];if(!d||s||(d.act||1)>curAct())return;
+ const pr=pc(mode);if(S.gold<pr){msg('Не хватает ресурсов.');return}
+ const x=cx*T,y=cy*T;if(d.trap){if(TG[i])return;S.gold-=pr;const q={type:mode,cx,cy,x:x+T/2,y:y+T/2,hp:d.hp||1,max:d.hp||1};TG[i]=q;S.TR.push(q);sfx('build');return}if(TG[i]){msg('Здесь лежит ловушка — сними её.');return}if(S.E.some(e=>e.x>x-5&&e.x<x+T+5&&e.y>y-5&&e.y<y+T+5)){msg('Клетка занята врагом.');return}
+ S.gold-=pr;const o={type:mode,cx,cy,x:x+T/2,y:y+T/2,hp:d.hp*M.hp,max:d.hp*M.hp,lv:1,cd:0,ang:0};S.T.push(o);G[i]=o;dirty=true;(S.bt=S.bt||{})[mode]=1;sfx('build')}
+function kill(s){if(LV.atk)S.gold+=ST[s.type].cost*.4;G[s.cy*W+s.cx]=null;S.T=S.T.filter(t=>t!==s);dirty=true}
+function boom(x,y,r,dmg,col){sfx('boom');S.F.push({k:'c',x,y,r,t:0,col});for(const e of S.E){if(e.fall>0||(gOnly&&EN[e.type].air))continue;if(Math.hypot(e.x-x,e.y-y)<r+EN[e.type].r)e.hp-=dmg}}
+function mv(e,d,dx,dy,dt){const r=d.r*.7,px=e.x+dx+Math.sign(dx)*r,py=e.y+dy+Math.sign(dy)*r;
+ const cx=px/T|0,cy=py/T|0,s=(cx>=0&&cx<W&&cy>=0&&cy<H)?G[cy*W+cx]:null;
+ if(s){if(!s.rock){s.hp-=d.wd*(e.br?2.5:1)*(e.bs>0?2.5:1)*dt;if(s.hp<=0){kill(s);sfx('crumble')}}if(dx)e.vx*=.3;if(dy)e.vy*=.3}
+ else{e.x+=dx;e.y=Math.min(CH-d.r,Math.max(d.r,e.y+dy))}}
+const HS=8,HC=CW/HS,HR=CH/HS,head=new Int32Array(HC*HR);let nxt=new Int32Array(2000);
+function step(dt){if(LV.atk){S.tm-=dt;S.gold+=LV.inc*dt;if(S.tm<=0&&!S.over){S.tm=0;end();return}}ackT+=dt;if(ackT>.7){ackT=0;chk()}if(S.cd>0)S.cd-=dt;for(const e of S.E)e.h0=e.hp;if(!LV.atk)for(const q of S.TR.slice())if(q.type=='wire'){q.hp-=dt*2.5;if(q.hp<=0){rmT(q);sfx('snap')}}if(dirty){field();dirty=false}
+ if(S.busy&&S.q.length){S.acc+=S.rate*dt;while(S.acc>=1&&S.q.length){S.acc--;spawn(S.q.pop())}}
+ const E=S.E;
+ for(const e of E){const d=EN[e.type];if(e.type=='pod'){podStep(e,dt);continue}if(d.air){hawkStep(e,dt);continue}let cx=Math.max(0,Math.min(W-1,e.x/T|0)),cy=Math.max(0,Math.min(H-1,e.y/T|0));
+  let tx,ty;
+  let uf=!(e.br&&S.T.length);
+  if(!uf){if(!e.tg||G[e.tg.cy*W+e.tg.cx]!==e.tg||(e.tt-=dt)<=0){let b=null,bd=1e12;for(const q of S.T){const w=(q.x-e.x)**2+(q.y-e.y)**2;if(w<bd){bd=w;b=q}}e.tg=b;e.tt=.6}
+   tx=e.tg.x-e.x;ty=e.tg.y-e.y;{const l0=Math.hypot(tx,ty)||1,gq=G[Math.min(H-1,Math.max(0,(e.y+ty/l0*T)/T|0))*W+Math.min(W-1,Math.max(0,(e.x+tx/l0*T)/T|0))];if(gq&&gq.rock)uf=true}}
+  if(uf){let best=D[cy*W+cx],bx=cx,by=cy;
+  for(const[dx,dy]of DIRS){const nx=cx+dx,ny=cy+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;
+   if(dx&&dy&&(G[cy*W+nx]||G[ny*W+cx]))continue;const v=D[ny*W+nx];if(v<best){best=v;bx=nx;by=ny}}
+  tx=bx*T+T/2-e.x;ty=by*T+T/2-e.y}
+  const L=Math.hypot(tx,ty)||1,k=Math.min(1,4*dt);
+  let spd=d.sp;const tr=TG[cy*W+cx];
+  if(d.dash){e.dt2=(e.dt2==null?2:e.dt2)-dt;if(e.dt2<=0&&!(e.bs>0)){e.bs=.8;e.dt2=4;sfx('dash')}if(e.bs>0){e.bs-=dt;spd*=3.2;S.F.push({k:'c',x:e.x,y:e.y,r:7,t:.2,col:'#ffe680',a:.2})}}
+  if(tr){if(tr.type=='wire'){spd*=.45;tr.hp-=dt*(e.br?30:12);e.hp-=3*dt;if(tr.hp<=0){rmT(tr);sfx('snap')}}else if(Math.hypot(tr.x-e.x,tr.y-e.y)<9){boom(tr.x,tr.y,32,70*M.dmg,'#e3b021');SV.st.mines++;rmT(tr)}}
+  e.sh=0;
+  if(d.shoot){if(!e.sg||G[e.sg.cy*W+e.sg.cx]!==e.sg||(e.st-=dt)<=0){e.sg=near(e);e.st=.5}
+   if(e.sg&&Math.hypot(e.sg.x-e.x,e.sg.y-e.y)<d.shoot){e.sh=1;e.sg.hp-=d.dps*dt;if(e.sg.hp<=0){kill(e.sg);sfx('crumble')}spd=0}}
+  if(d.heal&&(e.ht=(e.ht||0)-dt)<=0){e.ht=.8;for(const o of E)if(o!==e&&Math.hypot(o.x-e.x,o.y-e.y)<55)o.hp=Math.min(o.max,o.hp+o.max*.06);S.F.push({k:'c',x:e.x,y:e.y,r:55,t:.25,col:'#7be07b',a:.15})}
+  e.vx+=(tx/L*spd-e.vx)*k;e.vy+=(ty/L*spd-e.vy)*k;
+  mv(e,d,e.vx*dt,0,dt);mv(e,d,0,e.vy*dt,dt);
+  if(e.x>=GL[0]*T&&e.x<(GL[0]+GL[2])*T&&e.y>=GL[1]*T&&e.y<(GL[1]+GL[3])*T){e.dead=1;S.hp-=d.leak;{msg(LV.atk?'Прорыв! Цитадель врага под ударом.':'Золотые прорываются к цитадели!');sfx('alarm');S.lk=(S.lk||0)+1}}}
+ if(nxt.length<E.length)nxt=new Int32Array(E.length*2);
+ head.fill(-1);
+ E.forEach((e,i)=>{const h=Math.min(HR-1,e.y/HS|0)*HC+Math.min(HC-1,Math.max(0,e.x/HS|0));nxt[i]=head[h];head[h]=i});
+ E.forEach((e,i)=>{const a=EN[e.type],hx=Math.min(HC-1,Math.max(0,e.x/HS|0)),hy=Math.min(HR-1,e.y/HS|0);let n=0;
+  for(let gy=Math.max(0,hy-1);gy<=Math.min(HR-1,hy+1)&&n<14;gy++)for(let gx=Math.max(0,hx-1);gx<=Math.min(HC-1,hx+1);gx++)
+   for(let j=head[gy*HC+gx];j>=0&&n<14;j=nxt[j]){if(j<=i)continue;const o=E[j],b=EN[o.type];n++;
+    let dx=o.x-e.x,dy=o.y-e.y,L=Math.hypot(dx,dy),m=a.r+b.r;
+    if(L<m){if(L<.01){dx=Math.random()-.5;dy=Math.random()-.5;L=Math.hypot(dx,dy)}
+     const p=(m-L)*.5,wa=b.r/(a.r+b.r),wb=a.r/(a.r+b.r);dx/=L;dy/=L;
+     const t1=[e.x-dx*p*2*wa,e.y-dy*p*2*wa],t2=[o.x+dx*p*2*wb,o.y+dy*p*2*wb];
+     const free=(x,y)=>!G[(Math.min(H-1,Math.max(0,y/T|0)))*W+Math.min(W-1,Math.max(0,x/T|0))];
+     if(free(t1[0],t1[1])){e.x=t1[0];e.y=t1[1]}if(free(t2[0],t2[1])){o.x=t2[0];o.y=t2[1]}}}});
+ if(M.regen&&!S.busy)for(const t of S.T)if(t.hp<t.max)t.hp=Math.min(t.max,t.hp+t.max*M.regen*dt);
+ for(const t of S.T){if(t.type=='wall')continue;if(t.type=='servo'){servo(t,dt);continue}const d0=ST[t.type],d={...d0,dmg:d0.dmg*M.dmg*(1+.4*(t.lv-1)),rng:d0.rng*M.rng*(1+.08*(t.lv-1)),rate:d0.rate/M.rate};t.cd-=dt;t.fl-=dt;if(t.cd>0)continue;
+  let b=null,bd=d.rng*d.rng;
+  for(const e of E){const q=(e.x-t.x)**2+(e.y-t.y)**2,ed=EN[e.type];if(e.fall>0||(d0.ng&&ed.air)||(ed.stl&&q>2025))continue;if(q<bd){bd=q;b=e}}
+  if(!b)continue;t.cd=d.rate;t.fl=.1;t.ang=Math.atan2(b.y-t.y,b.x-t.x);
+  if(t.type=='gun'){sfx('gun');b.hp-=d.dmg;S.F.push({k:'l',x:t.x,y:t.y,x2:b.x,y2:b.y,t:.05,col:'#cfd6da',w:1})}
+  else if(t.type=='mortar'){sfx('mort');gOnly=1;boom(b.x,b.y,d.spl,d.dmg,'#b08a3e');gOnly=0}
+  else if(t.type=='lance'){sfx('lance');const ca=Math.cos(t.ang),sa=Math.sin(t.ang);
+   for(const e of E){const dx=e.x-t.x,dy=e.y-t.y,u=dx*ca+dy*sa;if(u>0&&u<d.rng&&Math.abs(-dx*sa+dy*ca)<4+EN[e.type].r)e.hp-=d.dmg}
+   S.F.push({k:'l',x:t.x,y:t.y,x2:t.x+ca*d.rng,y2:t.y+sa*d.rng,t:.08,col:'#ff6a3d',w:3})}
+  else if(t.type=='tesla'){sfx('zap');let cur=b,px=t.x,py=t.y,dm=d.dmg;const hit=new Set([b]);for(let k=0;k<5&&cur;k++){cur.hp-=dm;S.F.push({k:'z',x:px,y:py,x2:cur.x,y2:cur.y,t:.12});px=cur.x;py=cur.y;dm*=.7;let nx=null,nd=3600;for(const e of E){if(hit.has(e)||e.fall>0)continue;const q=(e.x-px)**2+(e.y-py)**2;if(q<nd){nd=q;nx=e}}if(nx)hit.add(nx);cur=nx}}
+  else if(t.type=='rail'){sfx('rail');const ca=Math.cos(t.ang),sa=Math.sin(t.ang);for(const e of E){if(e.fall>0)continue;const dx=e.x-t.x,dy=e.y-t.y,u=dx*ca+dy*sa;if(u>0&&u<d.rng&&Math.abs(-dx*sa+dy*ca)<5+EN[e.type].r)e.hp-=d.dmg}
+   S.F.push({k:'l',x:t.x,y:t.y,x2:t.x+ca*d.rng,y2:t.y+sa*d.rng,t:.2,col:'#7fb8ff',w:5},{k:'l',x:t.x,y:t.y,x2:t.x+ca*d.rng,y2:t.y+sa*d.rng,t:.2,col:'#fff',w:1.5})}
+  else if(t.type=='plasma'){sfx('plasma');S.PJ.push({x:t.x,y:t.y,tx:b.x,ty:b.y,dm:d.dmg})}
+  else{sfx('flame');for(const e of E)if(!EN[e.type].air&&!(e.fall>0)&&(e.x-t.x)**2+(e.y-t.y)**2<d.rng*d.rng)e.hp-=d.dmg;S.F.push({k:'c',x:t.x,y:t.y,r:d.rng,t:.2,col:'#ff7a2a',a:.25})}}
+ for(const e of E){const l=e.h0-e.hp;if(l>0&&e.pr)e.hp+=l*e.pr;e.pr=EN[e.type].pr||0}
+ for(const b of E)if(b.type=='bulwark')for(const e of E)if(e!==b&&e.pr<.35&&Math.hypot(e.x-b.x,e.y-b.y)<50)e.pr=.35;
+ for(const e of E)if(e.hp<=0&&!e.dead){e.dead=1;if(!LV.atk)S.gold+=EN[e.type].rew*M.inc;if(!LV.atk){SV.ad+=EN[e.type].rew*.03*M.adm;SV.st.kills++;if(e.type=='dorn')SV.st.dorn++}if(e.type=='raider'){boom(e.x,e.y,30,0,'#ff9a3a');hurtS(e.x,e.y,40,80);for(let i=0;i<8;i++)spawn('marine',e.x+Math.random()*24-12,e.y+Math.random()*24-12)}}
+ S.E=E.filter(e=>!e.dead);
+ for(const p of S.PJ){const dx=p.tx-p.x,dy=p.ty-p.y,L=Math.hypot(dx,dy),v=230*dt;if(L<=v){p.done=1;gOnly=1;boom(p.tx,p.ty,34,p.dm,'#b06aff');gOnly=0;S.Z.push({x:p.tx,y:p.ty,r:30,t:4,dm:p.dm*.3});sfx('plasmaB')}else{p.x+=dx/L*v;p.y+=dy/L*v}}
+ S.PJ=S.PJ.filter(p=>!p.done);
+ for(const z of S.Z){z.t-=dt;z.tk=(z.tk||0)-dt;if(z.tk<=0){z.tk=.4;for(const e of S.E)if(!EN[e.type].air&&!(e.fall>0)&&Math.hypot(e.x-z.x,e.y-z.y)<z.r+EN[e.type].r)e.hp-=z.dm*.4}}
+ S.Z=S.Z.filter(z=>z.t>0);
+ for(const f of S.F)f.t=(f.t||0)+(f.k=='c'&&f.a===undefined?dt:-dt);
+ S.F=S.F.filter(f=>f.k=='c'?(f.a===undefined?f.t<.4:f.t>0):f.t>0);
+ if(S.hp<=0){S.hp=0;LV.atk?win():end()}
+ else if(S.busy&&!S.q.length&&!S.E.length){S.busy=false;const b=Math.round((60+S.wave*15)*M.inc),a=Math.round((3+S.wave*2)*M.adm);S.gold+=b;SV.ad+=a;if(LV.id=='endless')SV.best=Math.max(SV.best,S.wave);SV.st.mw=Math.max(SV.st.mw,S.wave);if(!S.lk&&S.wave>=5)SV.st.nl=1;save();sfx('win');$('shop').classList.add('hot');
+  if(LV.waves&&S.wave>=LV.waves){win();return}msg('Волна '+S.wave+' отбита: +'+b+' ресурсов, +'+a+' Адамантия. Закупи улучшения в кузнях и перестрой рельеф.')}
+ ui()}
+function end(){S.over=true;sfx('over');const a=Math.round(S.wave*2*M.adm),n=S.wave-1;SV.ad+=a;if(LV.id=='endless')SV.best=Math.max(SV.best,n);save();$('ot').textContent='Цитадель затоплена';
+ $('od').textContent='Отбито волн: '+Math.max(0,n)+'. Адамантий за оборону: +'+a+'. Улучшения сохранены — купи новые и вернись сильнее.';$('ov').style.display='flex'}
+function draw(){c.setTransform(1,0,0,1,0,0);c.fillStyle='#0a0908';c.fillRect(0,0,CW,CH);c.setTransform(Z,0,0,Z,-VX*Z,-VY*Z);c.drawImage(BG,0,0);
+ c.fillStyle='rgba(255,150,70,.35)';if(SV.cfg.ash)for(const q of ASH){q.y+=q.v;q.x+=q.v*.6;if(q.y>CH||q.x>CW){q.y=-3;q.x=Math.random()*CW}c.fillRect(q.x,q.y,q.s,q.s)}
+ c.strokeStyle=SV.cfg.grid?'#ffffff07':'#0000';c.beginPath();for(let x=0;x<=W;x++){c.moveTo(x*T,0);c.lineTo(x*T,CH)}for(let y=0;y<=H;y++){c.moveTo(0,y*T);c.lineTo(CW,y*T)}c.stroke();
+ for(const z of SZ){c.fillStyle='#d9a52114';c.fillRect(z[0]*T,z[1]*T,z[2]*T,z[3]*T);c.strokeStyle='#d9a52077';c.setLineDash([6,6]);c.strokeRect(z[0]*T+1,z[1]*T+1,z[2]*T-2,z[3]*T-2);c.setLineDash([])}
+ {const gx=GL[0]*T,gy=GL[1]*T,gw=GL[2]*T,gh=GL[3]*T,gl=.35+.2*Math.sin(performance.now()/400);
+  c.fillStyle='#1a1d20';c.fillRect(gx-6,gy-6,gw+12,gh+12);c.strokeStyle='#3a4148';c.lineWidth=2;c.strokeRect(gx-5,gy-5,gw+10,gh+10);c.lineWidth=1;
+  c.fillStyle='#2a1c10';c.fillRect(gx,gy,gw,gh);c.fillStyle='rgba(255,120,30,'+gl+')';c.fillRect(gx+3,gy+3,gw-6,gh-6);
+  c.fillStyle='#d9a521';for(let x=gx+2;x<gx+gw;x+=10){c.fillRect(x,gy-4,4,3);c.fillRect(x,gy+gh+1,4,3)}for(let y=gy+2;y<gy+gh;y+=10){c.fillRect(gx-4,y,3,4);c.fillRect(gx+gw+1,y,3,4)}}
+ for(const z of S.Z){const a=Math.min(1,z.t);c.fillStyle='rgba(176,106,255,'+(.12+.1*Math.sin(performance.now()/120))*a*2+')';c.beginPath();c.arc(z.x,z.y,z.r,0,7);c.fill()}
+ for(const q of S.TR){c.save();c.translate(q.x,q.y);if(q.type=='mine'){c.fillStyle='#222';c.beginPath();c.arc(0,0,6,0,7);c.fill();c.fillStyle='#e3b021';c.fillRect(-1,-1,2,2)}else{const f=q.hp/q.max;c.globalAlpha=.4+.6*f;c.strokeStyle=f>.5?'#9aa3a8':f>.25?'#a8845a':'#a0552a';c.beginPath();c.moveTo(-9,-6);c.lineTo(9,-2);c.lineTo(-9,2);if(f>.35)c.lineTo(9,6);c.stroke()}c.restore()}
+ for(const t of S.T){const f=t.hp/t.max;c.save();c.translate(t.x,t.y);
+  if(t.type=='wall'){wall(t,f)}
+  else{const d=ST[t.type];base(f);
+   turret(t,d)}
+  c.restore();if(f<1){c.fillStyle='#300';c.fillRect(t.x-T/2,t.y+T/2-3,T,3);c.fillStyle='#6c6';c.fillRect(t.x-T/2,t.y+T/2-3,T*f,3)}c.fillStyle='#e3b021';for(let i=1;i<t.lv;i++)c.fillRect(t.x-T/2+2+(i-1)*4,t.y-T/2+2,3,3)}
+ for(const k of KS){const b=k.endsWith('b'),ty=b?k.slice(0,-1):k,d=EN[ty],L=S.E.filter(e=>e.type==ty&&!!e.br==b);if(!L.length||!LQ[ty]||b)continue;const col=ty=='dorn'?(LV.iw?CI:CL).dorn:(b&&ty!='ram')?['#7a2e0d','#ff7a2a']:(LV.iw?CI:CL)[ty];
+  c.fillStyle=col[0];c.beginPath();for(const e of L){c.moveTo(e.x+d.r+1.3,e.y);c.arc(e.x,e.y,d.r+1.3,0,7)}c.fill();
+  c.fillStyle=col[1];c.beginPath();for(const e of L){c.moveTo(e.x+d.r,e.y);c.arc(e.x,e.y,d.r,0,7)}c.fill();
+  if(ty=='dread'||ty=='dorn'){c.fillStyle='#300';for(const e of L)c.fillRect(e.x-d.r,e.y-d.r-5,d.r*2,3);c.fillStyle='#6c6';for(const e of L)c.fillRect(e.x-d.r,e.y-d.r-5,d.r*2*Math.max(0,e.hp/e.max),3)}}
+ for(const e of S.E)if((!LQ[e.type]||e.br)&&!EN[e.type].air)big(e);for(const e of S.E)if(EN[e.type].air)big(e);
+ c.strokeStyle='#ff4a4aaa';for(const e of S.E)if(e.sh){c.beginPath();c.moveTo(e.x,e.y);c.lineTo(e.sg.x,e.sg.y);c.stroke()}
+ for(const p of S.PJ){c.fillStyle='#d9a6ff';c.beginPath();c.arc(p.x,p.y,4,0,7);c.fill();c.fillStyle='#fff8';c.beginPath();c.arc(p.x,p.y,2,0,7);c.fill()}
+ for(const f of S.F){if(f.k=='z'){jag(f);continue}if(f.k=='l'){c.strokeStyle=f.col;c.lineWidth=f.w;c.beginPath();c.moveTo(f.x,f.y);c.lineTo(f.x2,f.y2);c.stroke();c.lineWidth=1}
+  else{const a=f.a!==undefined;c.globalAlpha=a?f.a:1-f.t/.4;c.fillStyle=f.col;c.beginPath();c.arc(f.x,f.y,a?f.r:f.r*(.4+f.t*1.5),0,7);c.fill();c.globalAlpha=1}}
+ if(hov){const x=hov.x*T,y=hov.y*T;
+  if(mode=='strike'){c.strokeStyle='#e3b021';c.beginPath();c.arc(hov.px,hov.py,70,0,7);c.stroke()}
+  else{const ok=!NB[hov.y*W+hov.x]&&!G[hov.y*W+hov.x];c.fillStyle=ok?'#6c63':'#c443';c.fillRect(x,y,T,T);
+   const d=ST[mode];if(d&&d.rng){c.strokeStyle='#fff5';c.beginPath();c.arc(x+T/2,y+T/2,d.rng*M.rng,0,7);c.stroke()}}}}
+function ui(){$('sg').textContent=Math.floor(S.gold);$('sw').textContent=LV.atk?Math.ceil(S.tm)+' с':S.wave+(LV.waves?'/'+LV.waves:'');$('shl').textContent=LV.atk?'Цитадель врага':'Цитадель';$('sel').textContent=LV.atk?'Отряд':'Враги';$('se').textContent=S.E.length+S.q.length;$('sh').textContent=S.hp;
+ document.querySelectorAll('#bar button[data-k]').forEach(b=>{const k=b.dataset.k;b.classList.toggle('on',mode==k);
+  if(ST[k]){b.disabled=S.gold<pc(k)||S.busy;b.style.display=(ST[k].act||1)>curAct()?'none':''}
+  if(k=='repair'||k=='upg'||k=='sell'||k=='strike')b.style.display=LV.atk?'none':'';if(LV.atk&&ST[k])b.style.display='none';
+  if(k.startsWith('u_')){const t=k.slice(2);b.style.display=LV.atk&&(LV.units||[]).includes(t)?'':'none';b.disabled=S.gold<UC[t]||S.over}
+  if(k=='ob'){b.style.display=LV.atk?'':'none';b.childNodes[0].textContent=S.ob?'Приказ: ломать укрепления':'Приказ: идти к цитадели'}if(k=='repair'||k=='upg'||k=='sell')b.disabled=S.busy;if(k=='strike'){b.childNodes[0].textContent=LV.dorn?'Молот Дорна':'Гнев Пертурабо';b.disabled=S.cd>0;b.querySelector('small').textContent=S.cd>0?'через '+Math.ceil(S.cd)+' с':'Удар с орбиты'}});
+ $('go').style.display=LV.atk?'none':'';$('go').disabled=S.busy&&!S.over;$('go').textContent=S.over?'Новая попытка':S.wave?'Следующая волна':'Начать волну';updShop()}
+const bar=$('bar');
+function btn(k,html,fn){const b=document.createElement('button');b.dataset.k=k;b.innerHTML=html;b.onclick=fn;bar.appendChild(b)}
+for(const k in ST)btn(k,ST[k].n+' (<span class="pc" data-c="'+k+'"></span>)<small>'+ST[k].d+'</small>',()=>{mode=k;ui()});
+btn('repair','Ремонт<small>Чинит постройку</small>',()=>{mode='repair';ui()});
+btn('upg','Улучшить<small>до ур. 3, +урон и прочность</small>',()=>{mode='upg';ui()});
+btn('sell','Разобрать<small>+60% цены</small>',()=>{mode='sell';ui()});
+btn('strike','Гнев Пертурабо<small></small>',()=>{if(S.cd<=0){mode='strike';ui()}});
+const UC={marine:36,jump:40,scout:45,term:40,bulwark:45,chap:45,dev:55,ram:70,champ:85,pod:90,hawk:100,dread:140,raider:170},UQ={marine:6,jump:4,scout:3},
+UN={marine:['Десантники','идут к цитадели'],jump:['Штурмовики','быстрые, хрупкие'],scout:['Скауты','невидимы для орудий'],term:['Терминатор','тяжёлая броня'],bulwark:['Щитоносец','защищает отряд'],chap:['Капеллан','лечит отряд'],dev:['Девастатор','бьёт издали'],ram:['Таран','ломает стены'],champ:['Чемпион','рывок и клинок'],pod:['Капсула','падает на укрепления'],hawk:['Ястреб','бомбит с воздуха'],dread:['Дредноут','крушит укрепления'],raider:['Лэнд Рейдер','огонь и десант']};
+for(const k in UC)btn('u_'+k,UN[k][0]+(UQ[k]?' ×'+UQ[k]:'')+' ('+UC[k]+')<small>'+UN[k][1]+'</small>',()=>deploy(k));
+btn('ob','Приказ: идти к цитадели<small>переключатель для десантников</small>',()=>{S.ob=!S.ob;ui()});
+const sp=document.createElement('button');sp.textContent='×1';sp.onclick=()=>{speed=speed==1?2:1;sp.textContent='×'+speed};bar.appendChild(sp);
+const pb=document.createElement('button');pb.textContent='Пауза';pb.onclick=()=>{paused=!paused;pb.textContent=paused?'Играть':'Пауза'};bar.appendChild(pb);
+const ab=document.createElement('button'),mb=document.createElement('button');
+function lab(){ab.textContent=SV.so?'Звук: выкл':'Звук: вкл';mb.textContent=SV.mo?'Музыка: выкл':'Музыка: вкл'}
+ab.onclick=()=>{audio();SV.so=SV.so?0:1;setVol();save();lab()};mb.onclick=()=>{audio();SV.mo=SV.mo?0:1;setVol();save();lab()};lab();bar.appendChild(ab);bar.appendChild(mb);
+addEventListener('pointerdown',audio);addEventListener('click',e=>{if(e.target.closest&&e.target.closest('button'))sfx('click')});$('pr').onclick=prestige;
+function setPause(v){paused=v;pb.textContent=paused?'Играть':'Пауза'}
+pb.onclick=()=>setPause(!paused);
+const mn=document.createElement('button');mn.textContent='Меню';mn.onclick=showMenu;bar.appendChild(mn);
+const SQ=[];
+function story(h,t,ty){SQ.push([h,t,ty]);if($('sty').style.display!='flex')nextS()}
+function nextS(){const q=SQ.shift(),cn=$('stc');$('sth').textContent=q[0];$('stt').textContent=q[1];sfx(q[2]?'sting':'story');cn.style.display=q[2]?'block':'none';if(q[2])spriteTo(cn,q[2]);$('sty').style.display='flex';setPause(true)}
+$('stb').onclick=()=>{if(SQ.length)nextS();else{$('sty').style.display='none';setPause($('menu').style.display=='flex')}};
+function showBes(){const g=$('bg');g.innerHTML='';const se=SV.se||{};
+ for(const k of BK){const open=!!se[k],d=EN[k=='brk'?'marine':k],card=document.createElement('div');card.className='bc';
+  const cn=document.createElement('canvas');cn.width=120;cn.height=90;card.appendChild(cn);const tx=document.createElement('div');
+  tx.innerHTML=open?'<b>'+EI[k].n+'</b><br><small>'+EI[k].d+'</small><br><small class="st">Здоровье '+d.hp+' · скорость '+d.sp+(d.shoot?' · дальность '+d.shoot:'')+' · урон цитадели '+d.leak+'</small>':'<b>???</b><br><small>Враг ещё не встречался</small>';
+  card.appendChild(tx);g.appendChild(card);
+  if(open)spriteTo(cn,k);else{const x=cn.getContext('2d');x.fillStyle='#3a3228';x.font='48px "Russo One",Impact';x.textAlign='center';x.fillText('?',60,60)}}
+ $('bes').style.display='flex';setPause(true)}
+$('mbes').onclick=showBes;$('bcl').onclick=()=>{$('bes').style.display='none';setPause($('menu').style.display=='flex')};
+const bs=document.createElement('button');bs.textContent='Бестиарий';bs.onclick=showBes;bar.appendChild(bs);
+for(const[t,f]of[['＋',()=>zoomAt(1.25,CW/2,CH/2)],['－',()=>zoomAt(.8,CW/2,CH/2)],['⌂',()=>{Z=1;VX=0;VY=0}]]){const z=document.createElement('button');z.textContent=t;z.title='Масштаб';z.onclick=f;bar.appendChild(z)}
+function showMenu(){chk();$('mst').textContent='Рекорд забега: '+SV.best+' волн · Осколков доктрины: '+(SV.sh||0)+' · Достижений: '+Object.keys(SV.ac).length+'/'+ACH.length;const pr=inProg();$('mgo').textContent=pr?'Продолжить':'Выбрать миссию';$('mnew').style.display=pr?'block':'none';$('menu').style.display='flex';setPause(true)}
+$('mgo').onclick=()=>{audio();if(inProg()){$('menu').style.display='none';setPause(false)}else showLvl()};
+$('mhow').onclick=()=>story('Как играть',HOW);
+const go=document.createElement('button');go.id='go';go.onclick=()=>S.over?init():startWave();bar.appendChild(go);
+$('rs').onclick=init;$('sh2').onclick=()=>{$('ov').style.display='none';$('shop').scrollIntoView({behavior:'smooth'})};
+function cell(e){const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*CW/r.width/Z+VX,y=(e.clientY-r.top)*CH/r.height/Z+VY;
+ return{x:Math.max(0,Math.min(W-1,x/T|0)),y:Math.max(0,Math.min(H-1,y/T|0)),px:x,py:y}}
+function act(p){if(S.over)return;if(mode=='strike'){sfx('strike');boom(p.px,p.py,70,150*M.sdm,'#ffd23a');S.cd=M.scd;SV.st.strikes++;mode='wall';msg('Орбитальная батарея Железного Круга открыла огонь.');ui();down=false;return}
+ build(p.x,p.y);ui()}
+cv.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);
+ if(e.button==1||e.button==2||pts.size>1){if(e.button==2)rcx=[e.clientX,e.clientY,0];down=false;if(pts.size==2){pan=pmid();pd=pdist()}else pan=[e.clientX,e.clientY];return}
+ down=true;hov=cell(e);act(hov)});
+cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect(),k=CW/r.width;zoomAt(e.deltaY<0?1.15:1/1.15,(e.clientX-r.left)*k,(e.clientY-r.top)*k)},{passive:false});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointermove',e=>{if(pts.has(e.pointerId))pts.set(e.pointerId,[e.clientX,e.clientY]);
+ const rc=cv.getBoundingClientRect(),kk=CW/rc.width;
+ if(pts.size==2){const d=pdist(),m=pmid();if(pd)zoomAt(d/pd,(m[0]-rc.left)*kk,(m[1]-rc.top)*kk);pd=d;if(pan){VX-=(m[0]-pan[0])*kk/Z;VY-=(m[1]-pan[1])*kk/Z;clampV()}pan=m;return}
+ if(rcx&&Math.hypot(e.clientX-rcx[0],e.clientY-rcx[1])>5)rcx[2]=1;if(pan&&(e.buttons&6)){VX-=(e.clientX-pan[0])*kk/Z;VY-=(e.clientY-pan[1])*kk/Z;pan=[e.clientX,e.clientY];clampV();return}
+ hov=cell(e);if(down&&(mode=='wall'||mode=='wire'||mode=='sell'||mode=='repair'))act(hov)});
+const pu=e=>{if(e.button==2&&rcx&&!rcx[2]){mode=null;ui()}if(e.button==2)rcx=null;pts.delete(e.pointerId);if(pts.size<2){pd=0;pan=null}down=false};addEventListener('pointerup',pu);addEventListener('pointercancel',pu);
+cv.addEventListener('pointerleave',()=>hov=null);
+addEventListener('keydown',e=>{if(e.key=='p'||e.key=='з')pb.click()});let Z=1,VX=0,VY=0,pan=null,pd=0,ackT=0,tq=[],tb=false;const pts=new Map();
+const pdist=()=>{const a=[...pts.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])||1},pmid=()=>{const a=[...pts.values()];return[(a[0][0]+a[1][0])/2,(a[0][1]+a[1][1])/2]};
+function clampV(){const vw=CW/Z,vh=CH/Z;VX=vw>=CW?(CW-vw)/2:Math.max(0,Math.min(CW-vw,VX));VY=vh>=CH?(CH-vh)/2:Math.max(0,Math.min(CH-vh,VY))}
+function zoomAt(f,sx,sy){const nz=Math.max(.7,Math.min(3,Z*f)),wx=sx/Z+VX,wy=sy/Z+VY;Z=nz;VX=wx-sx/Z;VY=wy-sy/Z;clampV()}
+addEventListener('keydown',e=>{if(e.key=='Escape'){mode=null;ui()}if($('menu').style.display=='flex')return;const st=30/Z,m={ArrowLeft:[-st,0],ArrowRight:[st,0],ArrowUp:[0,-st],ArrowDown:[0,st]}[e.key];
+ if(m){VX+=m[0];VY+=m[1];clampV();e.preventDefault()}else if(e.key=='+'||e.key=='=')zoomAt(1.25,CW/2,CH/2);else if(e.key=='-')zoomAt(.8,CW/2,CH/2);else if(e.key=='0'){Z=1;VX=0;VY=0}});
+const ACH=[
+['w1','Первая кровь','Отбить 1-ю волну',()=>SV.st.mw>=1],
+['w5','Закалённый','Отбить 5 волн',()=>SV.st.mw>=5],
+['w10','Несокрушимый','Отбить 10 волн',()=>SV.st.mw>=10],
+['w20','Вечный','Отбить 20 волн',()=>SV.st.mw>=20],
+['w30','Легенда Олимпии','Отбить 30 волн',()=>SV.st.mw>=30],
+['dorn','Ярость Железного Круга','Убить Рогала Дорна',()=>SV.st.dorn>=1],
+['k1k','Тысяча золотых','Убить 1000 врагов',()=>SV.st.kills>=1000],
+['k10k','Золотой отлив','Убить 10 000 врагов',()=>SV.st.kills>=10000],
+['nl','Безупречная оборона','Отбить волну 5+ без единого прорыва',()=>SV.st.nl>0],
+['maze','Архитектор лабиринта','Иметь 100 стен одновременно',()=>S.T.filter(t=>t.type=='wall').length>=100],
+['mine','Минёр','Подорвать 50 мин',()=>SV.st.mines>=50],
+['wrath','Гнев Пертурабо','Использовать удар с орбиты 25 раз',()=>SV.st.strikes>=25],
+['forge','Мастер-кузнец','Купить 10 уровней улучшений',()=>Object.values(SV.up).reduce((a,b)=>a+b,0)>=10],
+['arm','Полный арсенал','Построить все 4 типа орудий за один забег',()=>['gun','mortar','lance','flame'].every(k=>S.bt&&S.bt[k])],
+['lv3','Вершина мастерства','Довести постройку до 3 уровня',()=>S.T.some(t=>t.lv>=3)],
+['rich','Казна Железного Круга','Накопить 2000 ресурсов',()=>S.gold>=2000],
+['asc','Вознесение','Совершить вознесение',()=>(SV.sh||0)>0],
+['bes','Знаток врага','Открыть весь бестиарий',()=>BK.every(k=>SV.se&&SV.se[k])],
+['cm1','Защитник Олимпии','Пройти кампанию «Осада Олимпии»',()=>CAMP[0].L.every(l=>SV.cp&&SV.cp[l.id])],
+['cm2','Хозяин пепла','Пройти кампанию «Пепел Железного Круга»',()=>CAMP[1].L.every(l=>SV.cp&&SV.cp[l.id])],
+['cm3','Вечная цитадель','Завершить кампанию и защитить Олимпию',()=>!!(SV.cp&&SV.cp.c3c)],
+['cm4','Каменный кулак','Пройти кампанию за Рогала Дорна',()=>!!(SV.cp&&SV.cp.c4e)]];
+function chk(){if(!S)return;for(const a of ACH)if(!SV.ac[a[0]]&&a[3]()){SV.ac[a[0]]=1;save();sfx('win');tq.push(a[1]);if(!tb)nextT()}}
+function nextT(){const t=tq.shift(),el=$('toast');if(!t){tb=false;return}tb=true;el.textContent='★ Достижение: '+t;el.classList.add('show');setTimeout(()=>{el.classList.remove('show');setTimeout(nextT,450)},2800)}
+function showAch(){const g=$('ag');g.innerHTML='';let n=0;for(const a of ACH){const u=!!SV.ac[a[0]];if(u)n++;const d=document.createElement('div');d.className='ac'+(u?'':' lk');d.innerHTML='<b>'+(u?'★ ':'🔒 ')+a[1]+'</b><br><small>'+a[2]+'</small>';g.appendChild(d)}$('acn').textContent=n+'/'+ACH.length;$('ach').style.display='flex'}
+function applyCfg(){document.querySelector('.cw').classList.toggle('nv',!SV.cfg.vig);setVol()}
+function showSet(){$('c_sv').value=SV.cfg.sv;$('c_mv').value=SV.cfg.mv;for(const k of['ash','vig','grid'])$('c_'+k).checked=!!SV.cfg[k];$('set').style.display='flex'}
+for(const k of['sv','mv'])$('c_'+k).oninput=e=>{SV.cfg[k]=+e.target.value;setVol();save()};
+for(const k of['ash','vig','grid'])$('c_'+k).onchange=e=>{SV.cfg[k]=e.target.checked?1:0;applyCfg();save()};
+$('c_cl').onclick=()=>$('set').style.display='none';
+let rsc=0;$('c_rs').onclick=()=>{if(!rsc){rsc=1;$('c_rs').textContent='Точно сбросить? Нажми ещё раз';setTimeout(()=>{rsc=0;$('c_rs').textContent='Сбросить весь прогресс'},3000);return}
+ try{localStorage.removeItem('ironflood1')}catch(e){}SV={ad:0,up:{},best:0,cfg:SV.cfg};fixSV();save();calc();init();updShop(true);$('set').style.display='none';showMenu()};
+$('mach').onclick=showAch;$('acl').onclick=()=>$('ach').style.display='none';$('mset').onclick=showSet;
+$('mnew').onclick=()=>{audio();showLvl()};
+applyCfg();
+let LV,SZ=[],GL=[38,7,2,10],RK=[],NB={},rcx=null;
+const isB=n=>LV.boss?n==LV.boss:n%15==0;
+const WC=(x,y0,y1,g0,g1)=>{const r=[];for(let y=y0;y<=y1;y++)if(y<g0||y>g1)r.push(['wall',x,y]);return r};
+const ENDLESS={id:'endless',name:'Бесконечная осада',intro:'Волны не кончаются. Строй, улучшай и держись дольше, чем в прошлый раз: каждая отбитая волна приносит Адамантий.',sp:[[0,5,2,14]],gl:[38,7,2,10],rk:[]};
+const CAMP=[
+{id:'c1',n:'Осада Олимпии',d:'Дорн высаживает легионы под стенами Вечной цитадели. Пертурабо встречает его расчётом.',L:[
+ {id:'c1a',name:'Внешний вал',waves:8,cm:.8,w0:0,g:100,reward:25,sp:[[0,5,2,14]],gl:[38,7,2,10],rk:[],
+  intro:'Флот Дорна высаживается на равнине перед цитаделью. Поставь стены и первые орудия: Пертурабо хочет увидеть, как Кулаки встретят настоящую оборону.',
+  outro:'Первая атака захлебнулась. Но Пертурабо знает: это была лишь разведка.',story:{4:['Разведка боем','Кулаки ищут слабое место. «Пусть ищут, — говорит Пертурабо. — Я проектировал эти стены так, чтобы слабых мест не было».']}},
+ {id:'c1b',name:'Ущелье Костей',waves:10,cm:.9,w0:2,g:80,reward:40,sp:[[0,3,2,18]],gl:[38,9,2,6],rk:[[10,0,3,9],[10,15,3,9],[22,4,3,6],[22,14,3,6]],
+  intro:'Дорн повёл войска через ущелье. Скалы сами подсказывают, где ставить капканы: проходов мало, а значит, враг пойдёт густо.',
+  outro:'Ущелье стало братской могилой. Дорн меняет тактику.',story:{5:['Сапёры Дорна','Кулаки пустили вперёд штурмовые отряды с зарядами. «Он решил, что стены можно просто сломать, — усмехается Пертурабо. — Покажем, кто кого».']}},
+ {id:'c1c',name:'Ворота Цитадели',waves:12,boss:12,cm:1,hm:1.05,w0:4,reward:80,sp:[[0,8,2,8],[14,0,12,2]],gl:[38,9,2,6],rk:[[8,3,4,4],[8,17,4,4],[18,9,4,6],[28,4,3,5],[28,15,3,5]],
+  intro:'Кулаки подошли к самым воротам и идут сразу с двух сторон. На последней волне придёт сам Рогал Дорн.',
+  outro:'Дорн отступил. Олимпия осталась Вечной, а Пертурабо уже чертит новые стены.',story:{12:['Рогал Дорн','Примарх Имперских Кулаков встаёт перед воротами. «Стена против стены, брат», — говорит Пертурабо.']}}]},
+{id:'c2',n:'Пепел Железного Круга',d:'Рубежи прорваны. Бой идёт в руинах, враг приходит с разных сторон.',L:[
+ {id:'c2a',name:'Осадные рвы',act:2,unl:['tesla','servo'],waves:10,cm:1,w0:3,g:60,reward:50,sp:[[10,0,20,2]],gl:[16,22,8,2],rk:[[0,8,6,8],[34,8,6,8],[12,10,2,4],[26,10,2,4]],
+  intro:'Кулаки идут с севера, а цитадель лежит на юге. Рвы по краям сужают подход, так что используй каждый узкий проход.',
+  outro:'Северный рубеж удержан. Но на востоке уже слышны орудия.',story:{5:['Литании на пепле','Капелланы идут вместе с пехотой. «Убейте тех, кто молится, и остальные побегут», — приказывает Пертурабо.']}},
+ {id:'c2b',name:'Кольцо огня',act:2,waves:12,cm:1.1,hm:1.1,w0:5,reward:80,sp:[[0,4,2,16],[38,4,2,16]],gl:[18,10,4,4],rk:[[14,6,5,1],[21,6,5,1],[14,17,5,1],[21,17,5,1],[12,8,1,3],[12,13,1,3],[27,8,1,3],[27,13,1,3]],
+  intro:'Враг пришёл с двух сторон, а цитадель теперь в центре поля. Каждая стена здесь работает на оборону сразу в двух направлениях.',
+  outro:'Кольцо окружения разорвано. У Пертурабо наконец появилось время подумать.',story:{6:['Огонь в кольце','Кулаки зажали цитадель в клещи. «Окружение — это тоже геометрия», — говорит Пертурабо и чертит новую линию стен.']}},
+ {id:'c2c',name:'Падение Дорна',act:2,waves:15,boss:15,cm:1.2,hm:1.2,w0:6,reward:140,sp:[[0,6,2,12],[12,0,16,2],[12,22,16,2]],gl:[38,8,2,8],rk:[[8,4,3,4],[8,16,3,4],[16,8,3,3],[16,13,3,3],[24,5,3,4],[24,15,3,4],[31,9,2,6]],
+  intro:'Решающая битва. Дорн бросил в бой всё и атакует с трёх сторон. Если выстоишь, сломаешь его упорство навсегда.',
+  outro:'Дорн отброшен от стен, но не побеждён: на орбите собирается второй флот с гусеничной техникой, десантными капсулами и штурмовой авиацией.',story:{15:['Последний штурм','Рогал Дорн идёт в последнюю атаку. «Пусть эта осада станет уроком», — произносит Пертурабо.']}}]},
+{id:'c3',n:'Вечная',req:'c2c',d:'Дорн вернулся с тяжёлой техникой, капсулами и авиацией. Это последняя осада.',L:[
+ {id:'c3a',name:'Пепелище',act:3,unl:['rail','plasma'],waves:12,cm:1.1,hm:1.2,w0:8,g:120,reward:100,sp:[[0,4,2,16],[12,0,16,2]],gl:[38,8,2,8],rk:[[10,8,4,3],[10,14,4,3],[20,3,3,4],[20,17,3,4],[28,8,3,8]],
+  intro:'Дорн вернулся с гусеничной техникой, штурмовой авиацией и десантными капсулами. Для такого врага Пертурабо открывает самые дорогие свои разработки: рельсотрон и плазменный миномёт.',
+  outro:'Первый удар второй осады отбит, но небо над Олимпией всё ещё полно кораблей.',story:{4:['Небо горит','Громовые ястребы летят над стенами, не замечая скал. «Значит, пора учить стены стрелять вверх», — говорит Пертурабо.']}},
+ {id:'c3b',name:'Пустотный рубеж',act:3,waves:14,cm:1.2,hm:1.3,w0:10,reward:140,sp:[[0,2,2,8],[0,14,2,8],[19,0,8,2]],gl:[38,9,2,6],rk:[[8,10,5,4],[16,5,2,6],[16,13,2,6],[26,3,3,5],[26,16,3,5],[32,10,3,4]],
+  intro:'Враг идёт сразу с трёх направлений, с земли и с воздуха. Рейдеры расстреливают стены, а под их бронёй прячутся десантники.',
+  outro:'Рубеж удержан. Остался последний бой.',story:{7:['Лэнд Рейдеры','Тяжёлые машины Кулаков расстреливают стены издали. «Хорошая броня, — замечает Пертурабо. — Плохая геометрия».']}},
+ {id:'c3c',name:'Вечная',act:3,final:true,waves:18,boss:18,cm:1.3,hm:1.4,w0:12,reward:250,sp:[[0,5,2,14],[10,0,20,2],[10,22,20,2]],gl:[18,10,4,4],rk:[[14,7,2,2],[24,7,2,2],[14,15,2,2],[24,15,2,2],[8,10,2,4],[30,10,2,4]],
+  intro:'Последний штурм. Цитадель в центре, враг со всех сторон. Рогал Дорн ведёт последнюю волну лично. Покажи ему, почему эта цитадель Вечная.',
+  outro:'',story:{18:['Последний бой','Дорн выходит на последний рубеж. «Один из нас сегодня перестанет строить», — произносит Пертурабо.']}}]},
+{id:'c4',n:'Рогал Дорн: Каменный кулак',d:'Та же осада с другой стороны стен. Дорн то держит оборону башнями, то сам ведёт отряды на штурм укреплений Пертурабо.',L:[
+ {id:'c4a',name:'Лагерь на равнине',dorn:1,iw:1,waves:8,cm:.8,w0:0,g:100,reward:30,sp:[[0,5,2,14]],gl:[38,7,2,10],rk:[],
+  intro:'Рогал Дорн разбил лагерь на равнине перед Олимпией. Железные Воины бросились на вылазку, чтобы сорвать строительство осадных линий. Держи оборону башнями: в этой войне камень надёжнее клинка.',
+  outro:'Вылазка отбита. Дорн понимает: теперь можно идти вперёд.',story:{4:['Холодный расчёт','Железные Воины действуют, как механизм. «Они не знают усталости, — замечает Дорн, — но знают предел прочности».']}},
+ {id:'c4b',name:'Первый приступ',dorn:1,atk:1,time:210,core:30,gold:300,inc:11,hm:1.7,reward:50,units:['marine','jump','term','ram','chap'],sp:[[0,6,2,12]],gl:[38,8,2,8],rk:[[12,0,3,6],[12,18,3,6]],
+  pre:[...WC(26,2,21,10,13),['gun',28,6],['gun',28,10],['gun',28,13],['gun',28,17],['mortar',31,8],['mortar',31,15],['lance',33,11],['mine',24,11],['mine',24,12],['wire',23,11],['wire',23,12]],
+  intro:'Дорн переходит в наступление. Ты отдаёшь приказы отрядам: покупай подкрепления и ломай внешний вал Пертурабо. Каждый прорыв к цитадели наносит ей урон, а за разрушенные укрепления получаешь ресурсы. Время ограничено.',
+  outro:'Внешний вал прорван. Пертурабо отступил к внутренним рубежам.',story:{}},
+ {id:'c4c',name:'Ночная вылазка',dorn:1,iw:1,act:2,unl:['tesla','servo'],waves:10,boss:10,cm:1,w0:3,reward:70,sp:[[0,3,2,18]],gl:[38,9,2,6],rk:[[10,0,3,9],[10,15,3,9],[22,4,3,6],[22,14,3,6]],
+  intro:'Пертурабо ответил ночной контратакой. Теперь он использует лазутчиков, щитоносцев и десантные капсулы, а на последней волне придёт лично.',
+  outro:'Контратака сломлена. Но сам Пертурабо ещё не показал всех своих карт.',story:{10:['Пертурабо','Примарх Железных Воинов выходит в атаку. «Тебе не пройти, брат», — произносит Дорн.']}},
+ {id:'c4d',name:'Пролом',dorn:1,atk:1,time:240,core:45,gold:400,inc:13,hm:1.9,reward:90,units:['marine','jump','scout','term','bulwark','chap','dev','ram','champ','dread'],sp:[[0,6,2,12]],gl:[38,8,2,8],rk:[[10,0,3,7],[10,17,3,7],[20,9,2,6]],
+  pre:[...WC(18,1,22,9,14),...WC(28,1,22,10,13),['gun',20,4],['gun',20,19],['gun',30,6],['gun',30,17],['gun',30,11],['gun',30,12],['mortar',22,7],['mortar',22,16],['mortar',32,9],['mortar',32,14],['lance',32,11],['tesla',24,8,2],['tesla',24,15,2],['servo',30,3],['servo',30,20],['mine',26,11],['mine',26,12],['wire',16,10],['wire',16,11],['wire',16,12]],
+  intro:'Дорн готовит прорыв. Перед тобой два рубежа стен, орудия прикрывают проходы. Используй щитоносцев и капелланов, чтобы довести тяжёлые отряды до цитадели.',
+  outro:'Пролом сделан. Впереди сердце Олимпии.',story:{}},
+ {id:'c4e',name:'Сердце Олимпии',dorn:1,atk:1,final:1,time:300,core:70,gold:500,inc:15,hm:2.1,reward:200,eh:'ОЛИМПИЯ ПАЛА',units:['marine','jump','scout','term','bulwark','chap','dev','ram','champ','pod','hawk','dread','raider'],sp:[[0,6,2,12]],gl:[38,8,2,8],rk:[[8,0,3,5],[8,19,3,5],[14,8,2,8]],
+  pre:[...WC(18,0,23,8,15),...WC(26,0,23,9,14),...WC(33,2,21,10,13),['gun',20,3],['gun',20,20],['gun',28,4],['gun',28,19],['gun',35,5],['gun',35,18],['mortar',22,6],['mortar',22,17],['mortar',30,7],['mortar',30,16],['mortar',36,9],['mortar',36,14],['lance',24,9,2],['lance',24,14,2],['lance',31,11],['rail',35,11],['plasma',31,5],['plasma',31,18],['servo',29,8],['servo',29,15],['servo',34,6],['servo',34,17],['tesla',22,11,2],['tesla',22,12,2],['mine',16,10],['mine',16,13],['wire',20,10],['wire',20,13],['wire',24,11],['wire',24,12]],
+  intro:'Последний штурм Вечной цитадели. Три рубежа стен, рельсотрон, плазменные миномёты, сервиторы и мины. Брось в бой всё, что у тебя есть, и пробейся к сердцу Олимпии, пока не кончилось время.',
+  outro:'',epi:'<p>Рогал Дорн входит в сердце Олимпии. Вечная цитадель пробита, но Пертурабо в ней нет: он ушёл по подземным ходам, оставив на стенах чертежи новых бастионов.</p><p>«Он не побеждён, — говорит Дорн своему сержанту. — Он просто нашёл следующую стену».</p><p>Над руинами поднимается знамя Имперских Кулаков. Дорн знает: Олимпия пала, но осада Пертурабо только началась.</p><p>Две стороны одной войны. Обе считали себя строителями. Обе были правы.</p>',story:{}}]}];
+function rockDraw(g,r,rnd){for(let x=r[0];x<r[0]+r[2];x++)for(let y=r[1];y<r[1]+r[3];y++){g.fillStyle='#2a2825';g.fillRect(x*T,y*T,T,T);g.fillStyle='#3a3732';g.fillRect(x*T+1,y*T+1,T-2,5);g.fillStyle='#161412';g.fillRect(x*T+1,y*T+T-5,T-2,4);for(let i=0;i<3;i++){g.fillStyle='rgba(255,255,255,.06)';g.fillRect(x*T+rnd()*14,y*T+rnd()*14,2+rnd()*3,2)}}}
+function setMap(){SZ=LV.sp;GL=LV.gl;RK=LV.rk||[];NB={};
+ const mk=z=>{for(let x=z[0];x<z[0]+z[2];x++)for(let y=z[1];y<z[1]+z[3];y++)NB[y*W+x]=1};SZ.forEach(mk);mk(GL);
+ for(const r of RK)for(let x=r[0];x<r[0]+r[2];x++)for(let y=r[1];y<r[1]+r[3];y++){G[y*W+x]={rock:1,type:'rock',cx:x,cy:y,hp:1e9,max:1e9};NB[y*W+x]=1}
+ for(const[ty,cx,cy,l]of LV.pre||[]){const i=cy*W+cx,d=ST[ty];if(d.trap){const q={type:ty,cx,cy,x:cx*T+T/2,y:cy*T+T/2,hp:d.hp||1,max:d.hp||1};TG[i]=q;S.TR.push(q)}else{const l2=l||1,hp=d.hp*Math.pow(1.35,l2-1)*.8,o={type:ty,cx,cy,x:cx*T+T/2,y:cy*T+T/2,hp,max:hp,lv:l2,cd:0,ang:Math.PI};G[i]=o;S.T.push(o);NB[i]=1}}
+ mkBG()}
+LV=ENDLESS;
+function nextLv(){const k=CAMP.find(k=>k.L.includes(LV));if(!k)return null;return k.L[k.L.indexOf(LV)+1]||null}
+function startLevel(L){LV=L;init();for(const id of['lvl','menu','win','end'])$(id).style.display='none';setPause(false);story(L.name,L.intro);for(const k of L.unl||[])if(!(SV.seen&&SV.seen['t'+k])){SV.seen=SV.seen||{};SV.seen['t'+k]=1;save();story('Новое орудие: '+ST[k].n,TD[k],k)}}
+function showLvl(){const g=$('lg');g.innerHTML='';
+ for(const k of CAMP){const h=document.createElement('h3');h.textContent=k.n;g.appendChild(h);const p=document.createElement('p');p.textContent=k.d;g.appendChild(p);const row=document.createElement('div');row.className='row';
+  k.L.forEach((L,i)=>{const lk=i>0?!(SV.cp&&SV.cp[k.L[i-1].id]):(k.req&&!(SV.cp&&SV.cp[k.req])),dn=SV.cp&&SV.cp[L.id],b=document.createElement('button');b.disabled=lk;
+   b.innerHTML='<b>'+(dn?'✔ ':lk?'🔒 ':'')+(i+1)+'. '+L.name+'</b><br><small>'+(L.atk?'Штурм · '+L.time+' с':L.waves+' волн'+(L.boss?' · бой с боссом':'')+(L.iw?' · оборона':''))+'</small>';b.onclick=()=>startLevel(L);row.appendChild(b)});g.appendChild(row)}
+ const h=document.createElement('h3');h.textContent='Свободная игра';g.appendChild(h);const b=document.createElement('button');b.innerHTML='<b>Бесконечная осада</b><br><small>Волны без конца, рекорд сохраняется</small>';b.onclick=()=>startLevel(ENDLESS);g.appendChild(b);
+ $('lvl').style.display='flex'}
+function win(){S.over=true;sfx('win');const a=Math.round(LV.reward*M.adm);SV.ad+=a;SV.cp=SV.cp||{};SV.cp[LV.id]=1;save();chk();if(LV.final){ending();return}
+ $('wt').textContent='Победа: '+LV.name;$('wd').textContent=(LV.outro||'')+' Награда: +'+a+' Адамантия.';$('wnx').style.display=nextLv()?'inline-block':'none';$('win').style.display='flex'}
+$('wnx').onclick=()=>startLevel(nextLv());$('wlv').onclick=()=>{$('win').style.display='none';showLvl()};
+$('wsh').onclick=()=>{$('win').style.display='none';$('shop').scrollIntoView({behavior:'smooth'})};
+$('slv').onclick=()=>{$('ov').style.display='none';showLvl()};$('lcl').onclick=()=>$('lvl').style.display='none';
+let gOnly=0;
+const curAct=()=>LV.id=='endless'?(SV.cp&&SV.cp.c2c?3:SV.cp&&SV.cp.c1c?2:1):(LV.act||1);
+const TD={tesla:'Цепная молния бьёт цель и перескакивает на ближайших врагов, теряя силу. Хороша против плотных толп и воздуха.',servo:'Не стреляет: чинит постройки вокруг, даже во время штурма. Ставь рядом со стенами, которые давят сапёры.',rail:'Заряжается долго, но пробивает всех врагов на линии выстрела на огромной дальности, включая воздушные цели.',plasma:'Медленный снаряд взрывается и оставляет горящую землю, которая жжёт всех, кто в неё зайдёт. По воздуху не бьёт.'};
+function hurtS(x,y,r,dmg){for(const q of S.T.slice())if(Math.hypot(q.x-x,q.y-y)<r+8){q.hp-=dmg;if(q.hp<=0){kill(q);sfx('crumble')}}}
+function servo(t,dt){t.cd=(t.cd||0)-dt;t.ang+=dt*1.5;if(t.cd>0)return;t.cd=.6;let h=0;const r=70*M.rng*(1+.08*(t.lv-1));
+ for(const q of S.T)if(q!==t&&q.hp<q.max&&Math.hypot(q.x-t.x,q.y-t.y)<r){q.hp=Math.min(q.max,q.hp+q.max*.05*(1+.3*(t.lv-1)));h=1;S.F.push({k:'l',x:t.x,y:t.y,x2:q.x,y2:q.y,t:.15,col:'#6cff9a',w:1})}if(h)sfx('servo')}
+function podStep(e,dt){if(e.fall>0){e.hp=e.max;e.fall-=dt;if(e.fall<=0){e.fall=0;hurtS(e.x,e.y,36,70);S.F.push({k:'c',x:e.x,y:e.y,r:36,t:0,col:'#ff9a3a'});sfx('boom')}return}
+ e.op-=dt;if(e.op<=0){e.dead=1;for(let i=0;i<8;i++)spawn('marine',e.x+Math.random()*16-8,e.y+Math.random()*16-8);S.F.push({k:'c',x:e.x,y:e.y,r:22,t:0,col:'#f0bd25'});sfx('crumble')}}
+function hawkStep(e,dt){const gx=(GL[0]+GL[2]/2)*T,gy=(GL[1]+GL[3]/2)*T,dx=gx-e.x,dy=gy-e.y,L=Math.hypot(dx,dy)||1,sp=EN.hawk.sp;
+ e.vx=dx/L*sp;e.vy=dy/L*sp;e.x+=e.vx*dt;e.y+=e.vy*dt;e.bt=(e.bt==null?.6:e.bt)-dt;
+ if(e.bt<=0){e.bt=.8;if(S.T.some(q=>Math.hypot(q.x-e.x,q.y-e.y)<26)){hurtS(e.x,e.y,22,32);S.F.push({k:'c',x:e.x,y:e.y,r:22,t:0,col:'#ffb347'});sfx('bomb')}}
+ if(e.x>=GL[0]*T&&e.x<(GL[0]+GL[2])*T&&e.y>=GL[1]*T&&e.y<(GL[1]+GL[3])*T){e.dead=1;S.hp-=EN.hawk.leak;sfx('alarm');S.lk=(S.lk||0)+1}}
+function jag(f){c.strokeStyle='#bfe6ff';c.lineWidth=2;c.beginPath();c.moveTo(f.x,f.y);const n=5,dx=(f.x2-f.x)/n,dy=(f.y2-f.y)/n;for(let i=1;i<n;i++)c.lineTo(f.x+dx*i+(Math.random()-.5)*8,f.y+dy*i+(Math.random()-.5)*8);c.lineTo(f.x2,f.y2);c.stroke();c.strokeStyle='#fff';c.lineWidth=.8;c.stroke();c.lineWidth=1}
+function ending(){$('eh').textContent=LV.eh||'ВЕЧНАЯ ЦИТАДЕЛЬ УСТОЯЛА';$('et').innerHTML=LV.epi||'<p>Орбитальный флот Имперских Кулаков уходит от Олимпии. Рогал Дорн, не получивший ни одной бреши, оставляет у стен лишь пепел собственных надежд.</p><p>Пертурабо стоит на стене цитадели и считает. Не потери, а стены. Их стало больше. Каждая осада делала Вечную цитадель крепче.</p><p>«Дорн строит стены, чтобы защищаться, — произносит он. — Я строю их, чтобы побеждать. Разница в том, что я никогда не перестаю считать».</p><p>Над Олимпией уже собираются новые корабли. Осада не закончилась и никогда не закончится. В этом вся суть Вечной цитадели.</p>';
+ $('es').textContent='Врагов повержено: '+SV.st.kills+' · Адамантия в кузнях: '+Math.floor(SV.ad);$('end').style.display='flex'}
+$('em').onclick=()=>{$('end').style.display='none';showMenu()};$('eu').onclick=()=>startLevel(ENDLESS);
+const inProg=()=>!S.over&&(S.wave>0||(LV.atk&&S.tm<LV.time-1));
+const QD=['Стена держит тех, кто готов умереть за неё.','Ни шагу назад.','Империум стоит на камне и воле.','Пусть Железные Воины сломают зубы о нашу стену.','Каждый кирпич здесь присяга.'];
+function deploy(t){if(!LV.atk||S.over||S.gold<UC[t])return;S.gold-=UC[t];const n=UQ[t]||1;for(let i=0;i<n;i++){const e=spawn(t);if(e)e.br=!!({ram:1,scout:1,champ:1}[t]||(S.ob&&!EN[t].nb))}sfx('click')}
+init();showMenu();let last=performance.now();
+(function loop(n){const dt=Math.min(.05,(n-last)/1000);last=n;if(!S.over&&!paused)step(dt*speed);draw();requestAnimationFrame(loop)})(last);
+</script>
+</body>
+</html>
