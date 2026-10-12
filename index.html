@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16181d">
+<title>Игры</title>
+<style>
+:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%}
+body{margin:0;min-height:100%;background:#16181d;color:#eef0f3;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex;justify-content:center;padding:28px 16px 40px}
+main{width:100%;max-width:520px}
+h1{font:700 30px/1.1 Georgia,"Times New Roman",serif;letter-spacing:.01em;margin:8px 4px 6px}
+.lead{margin:0 4px 26px;color:#9aa1ad;font-size:15px}
+.list{display:grid;gap:14px}
+a.game{display:block;position:relative;padding:20px 20px 20px 24px;border-radius:14px;
+  text-decoration:none;color:var(--tx);background:var(--bg);border:1px solid var(--line);
+  overflow:hidden;transition:transform .15s ease,border-color .15s ease}
+a.game::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--ac)}
+a.game:hover,a.game:focus-visible{transform:translateY(-2px);border-color:var(--ac);outline:none}
+a.game:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+a.game:active{transform:scale(.99)}
+.name{display:block;font:700 22px/1.2 var(--face);color:var(--ac)}
+.desc{display:block;margin-top:6px;font-size:14.5px;line-height:1.4;color:var(--tx);opacity:.8}
+.predel{--bg:#141b45;--line:rgba(255,255,255,.12);--tx:#e8ebf8;--ac:#f0b552;--face:Georgia,serif}
+.nand{--bg:#12303f;--line:#2b5870;--tx:#e3f1f8;--ac:#6ee7c8;--face:ui-monospace,"SF Mono",Consolas,monospace}
+.citadel{--bg:#1f2328;--line:#3a4048;--tx:#d9dde0;--ac:#e3b021;--face:Impact,"Arial Narrow Bold",sans-serif}
+.citadel .name{letter-spacing:.04em;font-weight:400}
+@media (prefers-reduced-motion:reduce){a.game{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Игры</h1>
+  <p class="lead">Выбери, во что играть. Прогресс сохраняется на этом устройстве.</p>
+  <div class="list">
+    <a class="game predel" href="predel.html">
+      <span class="name">Предел</span>
+      <span class="desc">Idle-игра про математику</span>
+    </a>
+    <a class="game nand" href="nand-lab.html">
+      <span class="name">NAND-мастерская</span>
+      <span class="desc">Собирай логические схемы из одного элемента</span>
+    </a>
+    <a class="game citadel" href="citadel.html">
+      <span class="name">Вечная цитадель</span>
+      <span class="desc">Железный Круг</span>
+    </a>
+  </div>
+</main>
+</body>
+</html>
